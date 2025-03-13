@@ -1,11 +1,14 @@
 import kotlin.test.Ignore
 import kotlin.test.Test
 
+// Весь тестовый класс отключён с помощью @Ignore.
+// Студентам нужно раскомментировать код в каждом тесте и реализовать соответствующие классы,
+// чтобы тесты проходили успешно.
 @Ignore
 class Hw1KtTest {
-    // task 1 - make a Rectangle class that will have width and height
-    // as well as the area calculation method - area()
-    // the test below should pass - uncomment the code in it
+    // Задание 1: создать класс Rectangle с полями width и height,
+    // а также методом вычисления площади - area().
+    // Раскомментируйте код в тесте ниже, чтобы проверить своё решение.
     @Test
     fun rectangleArea() {
         /*val r = Rectangle(10, 20)
@@ -14,8 +17,8 @@ class Hw1KtTest {
         assertEquals(20, r.height)*/
     }
 
-    // task 2 - make the Rectangle.toString() method
-    // the test below should pass - uncomment the code in it
+    // Задание 2: переопределить метод toString() у класса Rectangle.
+    // Раскомментируйте код в тесте ниже.
     @Test
     fun rectangleToString() {
         /*val r = Rectangle(10, 20)
@@ -23,8 +26,8 @@ class Hw1KtTest {
         */
     }
 
-    // task 3 - make Rectangle.equals() and Rectangle.hashCode() methods
-    // the test below should pass - uncomment the code in it
+    // Задание 3: переопределить методы equals() и hashCode() для Rectangle.
+    // Раскомментируйте код в тесте ниже.
     @Test
     fun rectangleEquals() {
         /*val a = Rectangle(10, 20)
@@ -37,8 +40,8 @@ class Hw1KtTest {
         */
     }
 
-    // task 4 - make the Square class
-    // the test below should pass - uncomment the code in it
+    // Задание 4: создать класс Square (квадрат).
+    // Раскомментируйте код в тесте ниже.
     @Test
     fun squareEquals() {
         /*val a = Square(10)
@@ -52,8 +55,9 @@ class Hw1KtTest {
         */
     }
 
-    // task 5 - make the Figure interface with the area() method, inherit Rectangle and Square from it
-    // the test below should pass - uncomment the code in it
+    // Задание 5: создать интерфейс Figure с методом area(),
+    // и унаследовать от него Rectangle и Square.
+    // Раскомментируйте код в тесте ниже.
     @Test
     fun figureArea() {
         /*var f : Figure = Rectangle(10, 20)
@@ -64,8 +68,9 @@ class Hw1KtTest {
         */
     }
 
-    // task 6 - make the diffArea(a, b) method
-    // the test below should pass - uncomment the code in it
+    // Задание 6: реализовать функцию diffArea(a, b),
+    // которая принимает две фигуры (Figure) и возвращает разность их площадей.
+    // Раскомментируйте код в тесте ниже.
     @Test
     fun diffArea() {
         /*val a = Rectangle(10, 20)
@@ -73,5 +78,4 @@ class Hw1KtTest {
         assertEquals(diffArea(a, b), 100)
         */
     }
-
 }
