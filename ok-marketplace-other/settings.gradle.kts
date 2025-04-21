@@ -21,3 +21,5 @@ pluginManagement {
 }
 
 include(":ok-marketplace-dcompose")
+include(":ok-marketplace-specs")
+include(":ok-marketplace-swagger")

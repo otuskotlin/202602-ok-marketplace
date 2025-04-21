@@ -2,26 +2,26 @@ plugins {
     id("build-jvm")
 }
 
-repositories {
-    maven {
-        name = "LocalRepo"
-        url = uri("${rootProject.projectDir}/../ok-marketplace-other/build/repo")
-    }
+// 1. Настраиваем конфигурацию для получения файла из другого проекта
+val resourcesFromLib by configurations.creating {
+    isCanBeResolved = true
+    isCanBeConsumed = false
 }
-
-val resourcesFromLib by configurations.creating
 
 dependencies {
     implementation(libs.kotlinx.datetime)
-    resourcesFromLib("ru.otus.otuskotlin.marketplace:dcompose:1.0:resources@zip")
+    resourcesFromLib("ru.otus.otuskotlin.marketplace:ok-marketplace-dcompose:0.1.0:resources@zip")
 }
 
-tasks.register<Copy>("extractLibResources") {
-    from(zipTree(resourcesFromLib.singleFile))
-    into(layout.buildDirectory.dir("dcompose"))
+tasks {
+    val extractLibResources by registering(Copy::class) {
+        description = "Извлекаем ресурсы из zip"
+        from(resourcesFromLib.incoming.files.elements.map {
+            it.map { file -> zipTree(file) }
+        })
+        into(layout.buildDirectory.dir("dcompose"))
+    }
+
+    val build by getting { dependsOn(extractLibResources) }
 }
-
-tasks["build"].dependsOn("extractLibResources")
-
-
 
