@@ -1,9 +1,9 @@
 package ru.otus.otuskotlin.marketplace.api.log1.mapper
 
-import kotlinx.datetime.Clock
 import ru.otus.otuskotlin.marketplace.api.log1.models.*
 import ru.otus.otuskotlin.marketplace.common.MkplContext
 import ru.otus.otuskotlin.marketplace.common.models.*
+import kotlin.time.Clock
 
 fun MkplContext.toLog(logId: String) = CommonLogModel(
     messageTime = Clock.System.now().toString(),
