@@ -1,4 +1,4 @@
-package ru.otus.otuskotlin.marketplace.blackbox.fixture.client
+package ru.otus.otuskotlin.marketplace.e2e.be.base.client
 
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -7,7 +7,7 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
-import base.DockerCompose
+import ru.otus.otuskotlin.marketplace.e2e.be.base.DockerCompose
 import java.time.Duration
 import java.util.UUID
 

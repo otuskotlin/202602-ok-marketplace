@@ -29,11 +29,6 @@ docker {
     }
 }
 
-//jib {
-//    from.image = "eclipse-temurin:21-jre"
-//    container.mainClass = "io.ktor.server.cio.EngineMain"
-//}
-
 kotlin {
     // !!! Обязательно. Иначе не проходит сборка толстых джанриков в shadowJar
     jvm {  }
@@ -58,10 +53,6 @@ kotlin {
                 implementation(libs.ktor.server.headers.caching)
                 implementation(libs.ktor.server.websocket)
 
-//                // Для того, чтоб получать содержимое запроса более одного раза
-//                В Application.main добавить `install(DoubleReceive)`
-//                implementation("io.ktor:ktor-server-double-receive:${libs.versions.ktor.get()}")
-
                 implementation(project(":ok-marketplace-common"))
                 implementation(project(":ok-marketplace-app-common"))
                 implementation(project(":ok-marketplace-biz"))
@@ -78,9 +69,9 @@ kotlin {
 
                 // logging
                 implementation(project(":ok-marketplace-api-log1"))
-                implementation("ru.otus.otuskotlin.marketplace.libs:ok-marketplace-lib-logging-common")
-                implementation("ru.otus.otuskotlin.marketplace.libs:ok-marketplace-lib-logging-kermit")
-                implementation("ru.otus.otuskotlin.marketplace.libs:ok-marketplace-lib-logging-socket")
+                implementation(libs.mkpl.logs.common)
+                implementation(libs.mkpl.logs.kermit)
+                implementation(libs.mkpl.logs.socket)
             }
         }
 

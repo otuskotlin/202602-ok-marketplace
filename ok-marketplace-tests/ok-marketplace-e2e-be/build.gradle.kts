@@ -32,6 +32,7 @@ dependencies {
     testImplementation(libs.ktor.client.okhttp)
 
     testImplementation(libs.rabbitmq.client)
+    testImplementation(libs.kafka.client)
 }
 
 var severity: String = "MINOR"
