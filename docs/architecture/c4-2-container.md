@@ -2,7 +2,7 @@
 
 **Уровень:** Container (C4-2)  
 **Система:** OK Marketplace  
-**Версия:** 4.0  
+**Версия:** 5.0  
 **Дата:** 2026-03-26  
 **Статус:** Готово к review
 
@@ -64,7 +64,80 @@ AD Service
 └── /api/ad/v1
 ```
 
-### 2.3 Profile Service
+### 2.3 Shell Web App
+
+| Атрибут              | Описание                                                                              |
+|----------------------|--------------------------------------------------------------------------------------|
+| **Название**         | Shell Web App                                                                        |
+| **Тип**              | Контейнер (хост-приложение)                                                          |
+| **Технология**       | Compose Multiplatform (Web/JS)                                                       |
+| **Назначение**       | Оболочка приложения: навигация, layout, lazy-loading микрофронтендов, мост авторизации |
+| **Статус**           | **MVP**                                                                              |
+| **Ответственность**  | - Единый layout (header, sidebar, footer)<br>- Shell Router: навигация между MFE<br>- Auth-bridge: JWT handling, сессия<br>- Lazy-loading модулей по маршруту |
+
+### 2.4 Auth Microfrontend
+
+| Атрибут              | Описание                                                                              |
+|----------------------|--------------------------------------------------------------------------------------|
+| **Название**         | Auth Microfrontend                                                                   |
+| **Тип**              | Контейнер (микрофронтенд)                                                            |
+| **Технология**       | Compose Multiplatform Module                                                         |
+| **Назначение**       | UI-модуль аутентификации: логин, регистрация, восстановление пароля, OAuth          |
+| **Статус**           | **MVP**                                                                              |
+| **Ответственность**  | - Экраны входа и регистрации<br>- Social login (Google, GitHub)<br>- Валидация форм<br>- Передача OAuth flow в IAM |
+
+**Связи:**
+- Shell Web App → lazy-load → Auth Microfrontend
+- Auth Microfrontend → API Gateway → IAM (Casdoor) — OAuth/OIDC flow
+
+### 2.5 Ad Microfrontend
+
+| Атрибут              | Описание                                                                              |
+|----------------------|--------------------------------------------------------------------------------------|
+| **Название**         | Ad Microfrontend                                                                     |
+| **Тип**              | Контейнер (микрофронтенд)                                                            |
+| **Технология**       | Compose Multiplatform Module                                                         |
+| **Назначение**       | UI-модуль объявлений: CRUD, поиск, каталог, фильтры                                |
+| **Статус**           | **MVP**                                                                              |
+| **Ответственность**  | - Создание и редактирование объявлений<br>- Список и карточка объявления<br>- Поиск и фильтрация<br>- Категории и каталог |
+
+**Связи:**
+- Shell Web App → lazy-load → Ad Microfrontend
+- Ad Microfrontend → API Gateway → AD Service — REST API
+
+### 2.6 Profile Microfrontend
+
+| Атрибут              | Описание                                                                              |
+|----------------------|--------------------------------------------------------------------------------------|
+| **Название**         | Profile Microfrontend                                                                |
+| **Тип**              | Контейнер (микрофронтенд)                                                            |
+| **Технология**       | Compose Multiplatform Module                                                         |
+| **Назначение**       | UI-модуль профиля: данные пользователя, избранное, история просмотров                |
+| **Статус**           | **Roadmap**                                                                          |
+| **Ответственность**  | - Редактирование профиля (имя, фото, bio)<br>- Список избранного<br>- История просмотров<br>- Настройки уведомлений |
+
+**Связи:**
+- Shell Web App → lazy-load → Profile Microfrontend
+- Profile Microfrontend → API Gateway → Profile Service — REST API
+
+### 2.7 Chat Microfrontend
+
+| Атрибут              | Описание                                                                              |
+|----------------------|--------------------------------------------------------------------------------------|
+| **Название**         | Chat Microfrontend                                                                   |
+| **Тип**              | Контейнер (микрофронтенд)                                                            |
+| **Технология**       | Compose Multiplatform Module                                                         |
+| **Назначение**       | UI-модуль чата: окно диалога, список чатов, real-time сообщения                     |
+| **Статус**           | **Roadmap**                                                                          |
+| **Ответственность**  | - Окно чата между продавцом и покупателем<br>- Список диалогов<br>- WebSocket для real-time<br>- Отправка текста и фото |
+
+**Связи:**
+- Shell Web App → lazy-load → Chat Microfrontend
+- Chat Microfrontend → API Gateway → Chat Service — REST + WebSocket
+
+---
+
+### 2.8 Profile Service
 
 | Атрибут              | Описание                                                                              |
 |----------------------|--------------------------------------------------------------------------------------|
@@ -83,7 +156,7 @@ Profile Service
 └── /api/profile/v1
 ```
 
-### 2.4 Chat Service
+### 2.9 Chat Service
 
 | Атрибут              | Описание                                                                              |
 |----------------------|--------------------------------------------------------------------------------------|
@@ -103,7 +176,7 @@ Chat Service
 └── /ws/chat/v1/messages  (WebSocket)
 ```
 
-### 2.5 Notification Service
+### 2.10 Notification Service
 
 | Атрибут              | Описание                                                                              |
 |----------------------|--------------------------------------------------------------------------------------|
@@ -122,7 +195,7 @@ Notification Service
 └── /api/notification/v1
 ```
 
-### 2.6 Monetization Service
+### 2.11 Monetization Service
 
 | Атрибут              | Описание                                                                              |
 |----------------------|--------------------------------------------------------------------------------------|
@@ -143,7 +216,7 @@ Monetization Service
 └── /api/monetization/v1/wallets
 ```
 
-### 2.7 Verification Service
+### 2.12 Verification Service
 
 | Атрибут              | Описание                                                                              |
 |----------------------|--------------------------------------------------------------------------------------|
@@ -164,7 +237,7 @@ Verification Service
 └── /api/verification/v1/disputes
 ```
 
-### 2.8 IAM
+### 2.13 IAM
 
 | Атрибут              | Описание                                                                                                      |
 |----------------------|---------------------------------------------------------------------------------------------------------------|
@@ -176,7 +249,7 @@ Verification Service
 | **Протоколы**       | OIDC / OAuth 2.0                                                                                              |
 | **Ответственность**  | - Регистрация и вход пользователей<br>- Управление организациями<br>- Выпуск и валидация JWT-токенов<br>- SSO |
 
-### 2.9 PostgreSQL (AD Service DB)
+### 2.14 PostgreSQL (AD Service DB)
 
 | Атрибут              | Описание                                                                              |
 |----------------------|--------------------------------------------------------------------------------------|
@@ -186,7 +259,7 @@ Verification Service
 | **Назначение**       | Персистентное хранение объявлений                                                      |
 | **Схема данных**    | ads, companies                                                                       |
 
-### 2.10 PostgreSQL (IAM DB)
+### 2.15 PostgreSQL (IAM DB)
 
 | Атрибут              | Описание                                                 |
 |----------------------|----------------------------------------------------------|
@@ -215,51 +288,61 @@ Verification Service
 
 ```mermaid
 C4Container
-    title Диаграмма контейнеров — OK Marketplace (Полная архитектура)
+    title [L2] Диаграмма контейнеров — OK Marketplace (Micro-frontends)
 
     Person(user, "Пользователь", "Продавец / Покупатель")
 
-%% ВНЕШНИЕ СИСТЕМЫ (Infrastructure & Auth)
-    System_Ext(iam, "IAM (Casdoor)", "OIDC / OAuth2", "Управление пользователями, ролями и выпуск JWT")
-    System_Ext(api_gw, "API Gateway (Envoy)", "Edge Proxy", "Маршрутизация и stateless-валидация JWT")
+    System_Ext(api_gw, "API Gateway (Envoy)", "Edge Proxy", "Маршрутизация трафика (UI + API)")
+    System_Ext(iam, "IAM (Casdoor)", "OIDC", "Auth & Identity")
 
-%% НАША СИСТЕМА (То, что мы разрабатываем)
     Container_Boundary(marketplace, "OK Marketplace") {
-        Container_Boundary(mvp, "MVP (Реализуется)") {
-            Container(ad_service, "AD Service", "Kotlin, Ktor", "Управление объявлениями (CRUD, поиск)")
-            ContainerDb(postgres_ad, "PostgreSQL (AD)", "PostgreSQL 15+", "БД: объявления, компании")
+
+        Container(shell, "Shell Web App", "Compose/JS", "Хост-приложение (Layout, Навигация, Auth-bridge, Lazy-loading)")
+
+        Container_Boundary(mfe_layer, "Micro-frontends") {
+            Container(auth_mfe, "Auth Microfrontend", "Compose Module", "UI: Login, Register, OAuth")
+            Container(ad_mfe, "Ad Microfrontend", "Compose Module", "UI: Поиск, карточки, подача")
+            Container(profile_mfe, "Profile Microfrontend", "Compose Module", "UI: Профиль, избранное (Roadmap)")
+            Container(chat_mfe, "Chat Microfrontend", "Compose Module", "UI: Окно чата, диалоги (Roadmap)")
         }
 
-        Container_Boundary(roadmap, "Roadmap (Будущие сервисы)") {
-            Container(profile_service, "Profile Service", "Kotlin, Ktor", "Профили, история, избранное")
-            Container(chat_service, "Chat Service", "Kotlin, Ktor + WS", "Мессенджер, real-time чаты")
-            Container(notif_service, "Notification Service", "Kotlin, Ktor", "Email/Push/SMS уведомления")
-            Container(monet_service, "Monetization Service", "Kotlin, Ktor", "Платежи, подписки, комиссии")
-            Container(verif_service, "Verification Service", "Kotlin, Ktor", "Верификация, trust score")
+        Container_Boundary(ad_domain, "Domain: Ads (MVP)") {
+            Container(ad_service, "AD Service", "Kotlin, Ktor", "Backend: CRUD, Поиск")
+            ContainerDb(postgres_ad, "PostgreSQL (AD)", "DB")
+        }
+
+        Container_Boundary(chat_domain, "Domain: Chats (Roadmap)") {
+            Container(chat_service, "Chat Service", "Kotlin, Ktor", "Backend: WS, История сообщений")
         }
     }
 
-%% Внешние системы
-    System_Ext(email_provider, "Email Provider", "SMTP/API")
-    System_Ext(iam_db, "PostgreSQL (IAM)", "Хранилище Casdoor")
+%% Маршрутизация трафика
+    Rel_Down(user, api_gw, "Вход в систему", "HTTPS")
 
-%% СВЯЗИ
-    Rel_Down(user, api_gw, "Пользуется UI", "HTTPS")
+%% Шлюз раздает и фронт, и данные
+    Rel_Down(api_gw, shell, "Загрузка оболочки", "Static")
+    Rel_Down(api_gw, auth_mfe, "Загрузка Auth MFE", "Static")
+    Rel_Down(api_gw, ad_mfe, "Загрузка Ads MFE", "Static")
+    Rel_Down(api_gw, profile_mfe, "Загрузка Profile MFE", "Static")
+    Rel_Down(api_gw, chat_mfe, "Загрузка Chat MFE", "Static")
 
-    Rel_Right(api_gw, iam, "Авторизация", "OIDC")
+    Rel_Down(api_gw, ad_service, "API: /api/ad/v1/*", "HTTP2")
+    Rel_Down(api_gw, chat_service, "API: /api/chat/v1/*", "HTTP2/WS")
+    Rel_Down(api_gw, iam, "OAuth/OIDC", "HTTPS")
 
-    Rel_Down(api_gw, ad_service, "Проксирует /ads", "HTTP2")
-    Rel_Down(ad_service, postgres_ad, "SQL", "JDBC")
+%% Внутренние связи
+    Rel_Right(shell, auth_mfe, "Lazy-load")
+    Rel_Right(shell, ad_mfe, "Lazy-load")
+    Rel_Right(shell, profile_mfe, "Lazy-load")
+    Rel_Right(shell, chat_mfe, "Lazy-load")
 
-    Rel_Down(api_gw, profile_service, "Проксирует /profiles", "HTTP2")
-    Rel_Down(api_gw, chat_service, "Проксирует /chats", "HTTP2/WS")
-    Rel_Down(api_gw, notif_service, "Проксирует /notifications", "HTTP2")
-    Rel_Down(api_gw, monet_service, "Проксирует /payments", "HTTP2")
-    Rel_Down(api_gw, verif_service, "Проксирует /verification", "HTTP2")
+%% MFE → API Gateway
+    Rel_Up(auth_mfe, api_gw, "OAuth flow", "HTTPS")
+    Rel_Up(ad_mfe, api_gw, "Запросы данных", "JSON/JWT")
+    Rel_Up(profile_mfe, api_gw, "Запросы данных", "JSON/JWT")
+    Rel_Up(chat_mfe, api_gw, "Запросы данных", "JSON/JWT")
 
-    Rel_Right(ad_service, email_provider, "Уведомления", "SMTP")
-
-    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+    UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="1")
 ```
 
 ---
@@ -398,14 +481,17 @@ graph LR
 
 ### 7.1 Единые точки отказа (SPOF)
 
-| Компонент           | Риск SPOF                     | Митигация                                                   |
-|---------------------|-------------------------------|-------------------------------------------------------------|
-| API Gateway         | Шлюз недоступен              | Горизонтальное масштабирование (несколько инстансов)       |
-| AD Service          | Сервис недоступен            | Горизонтальное масштабирование; health checks              |
-| Profile Service     | Сервис недоступен            | Горизонтальное масштабирование                              |
-| Chat Service        | Сервис недоступен            | Горизонтальное масштабирование; WebSocket sticky sessions  |
-| PostgreSQL (AD)     | База данных недоступна       | Репликация (master-slave или patroni)                      |
-| IAM                 | Сервис недоступен            | Кэширование JWT на Gateway; несколько инстансов           |
+| Компонент              | Риск SPOF                     | Митигация                                                   |
+|------------------------|-------------------------------|-------------------------------------------------------------|
+| API Gateway            | Шлюз недоступен              | Горизонтальное масштабирование (несколько инстансов)       |
+| Shell Web App          | Оболочка недоступна          | CDN; fallback на полный reload                              |
+| Auth Microfrontend     | Модуль недоступен            | Fallback на прямой редирект на IAM                         |
+| Ad Microfrontend       | Модуль недоступен            | CDN cache; SSR fallback                                     |
+| AD Service             | Сервис недоступен            | Горизонтальное масштабирование; health checks              |
+| Profile Service        | Сервис недоступен            | Горизонтальное масштабирование                              |
+| Chat Service           | Сервис недоступен            | Горизонтальное масштабирование; WebSocket sticky sessions  |
+| PostgreSQL (AD)        | База данных недоступна       | Репликация (master-slave или patroni)                      |
+| IAM                    | Сервис недоступен            | Кэширование JWT на Gateway; несколько инстансов           |
 
 ### 7.2 Узкие места
 
@@ -447,7 +533,7 @@ graph LR
 
 ---
 
-*Document Version: 4.0*  
+*Document Version: 5.0*  
 *Created: 2026-03-26*  
 *Status: Готово к review*  
-*Changes: Добавлены Roadmap-сервисы: Profile, Chat, Notification, Monetization, Verification. Полная архитектура микросервисов.*
+*Changes: Микрофронтенды перенесены из C4-3. Добавлены контейнеры: Shell Web App, Auth MFE, Ad MFE, Profile MFE, Chat MFE. Диаграмма обновлена.*

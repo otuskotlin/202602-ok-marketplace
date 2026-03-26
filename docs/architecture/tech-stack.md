@@ -16,7 +16,7 @@ graph TB
     
     subgraph "Backend Layer (MVP)"
         MS["Marketplace Service<br/>Kotlin/Ktor"]
-        CD["Casdoor<br/>Go/OAuth2/OIDC"]
+        CD["IAM<br/>Casdoor/OIDC"]
     end
     
     subgraph "Data Layer (MVP)"
@@ -51,9 +51,14 @@ graph LR
     subgraph "Technologies (MVP)"
         FE["Kotlin<br/>Compose Multiplatform"]
         GW["Envoy Gateway<br/>Y.Cloud"]
-        MS["Marketplace Service<br/>Kotlin/Ktor"]
+%%        MS["Marketplace Service<br/>Kotlin/Ktor"]
+        subgraph MS ["Marketplace Service (Kotlin/Ktor)"]
+            Logic["Бизнес-логика"]
+            CB["Casbin (Policy Engine)"]
+            Logic --> CB
+        end
         PG["PostgreSQL 15+"]
-        CD["Casdoor<br/>OAuth 2.0/OIDC"]
+        CD["Casdoor<br/>/OIDC"]
         CB["Casbin<br/>RBAC/ABAC"]
     end
     
@@ -67,7 +72,7 @@ graph LR
     FE --> GW
     GW --> MS
     MS --> PG
-    MS --> CD
+    CD --> PG
     MS --> CB
 ```
 
@@ -88,11 +93,11 @@ graph TB
 ```mermaid
 graph TB
     subgraph "AD Service"
-        MS["Ktor<br/>Exposed ORM<br/>Casbin RBAC<br/>Ads Engine<br/>Email Notifications"]
+        MS["Ktor<br/>Exposed ORM<br/>Casbin RBAC<br/>Ads Engine<br/>Email Notifications<br/>Kotlinx.Serialization"]
     end
     
-    subgraph "Casdoor"
-        CD["Go<br/>OAuth 2.0/OIDC<br/>JWT<br/>User Management"]
+    subgraph "IAM"
+        CD["Casdoor/OIDC<br/>JWT<br/>User Management"]
     end
 ```
 
@@ -100,24 +105,38 @@ graph TB
 
 ```mermaid
 graph LR
-    subgraph "Envoy Gateway Features"
+    subgraph Features ["Envoy Gateway Features"]
         HTTP2["HTTP/2<br/>Multiplexing"]
         JWTv["JWT Validation"]
         Rate["Rate Limiting"]
         LB["Load Balancing"]
         TLS["TLS Termination"]
     end
-    
-    subgraph "Endpoints"
-        API["/api/v1/* → Services"]
-        Auth["/auth/* → Casdoor"]
+
+    subgraph Endpoints ["Endpoints & Routing"]
+        API["/api/{service}/v1/*"]
+        Auth["/auth/*"]
     end
-    
+
+    subgraph Backends ["Upstream Services"]
+        MS["Ad Service"]
+        CD["Casdoor (IAM)"]
+    end
+
+%% Применяем фичи к основному API
     HTTP2 --> API
     JWTv --> API
     Rate --> API
     TLS --> API
-    Auth --> Auth
+    LB --> API
+
+%% Маршрутизация к конкретным сервисам
+    API --> MS
+    Auth --> CD
+
+%% Фичи для Auth (обычно только TLS и HTTP2)
+    TLS --> Auth
+    HTTP2 --> Auth
 ```
 
 ## Database (MVP)
@@ -125,8 +144,10 @@ graph LR
 ```mermaid
 graph TB
     subgraph "PostgreSQL 15+ (Managed)"
-        DB1["marketplace_db<br/>ads, companies, notifications"]
-        DB2["casdoor_db<br/>users, organizations, sessions, tokens"]
+        DB_AD["ads_db<br/>Объявления, компании (MVP)"]
+%%        DB_COMM["comments_db"]
+%%        DB_CHATS["chats_db"]
+        DB_CD["casdoor_db<br/>Пользователи, сессии, токены"]
     end
 ```
 
@@ -135,7 +156,7 @@ graph TB
 ```mermaid
 graph LR
     subgraph "Authentication"
-        OAuth["OAuth 2.0 / OIDC"]
+        OAuth["OIDC"]
         JWT["JWT Tokens"]
     end
     
@@ -152,16 +173,22 @@ graph LR
 ## Deployment
 
 ```mermaid
-graph TB
+graph TD
+    User([Пользователь]) --> ManagedGW
+
     subgraph "Y.Cloud Platform"
-        CDN["CDN<br/>Static Assets"]
-        Containers["Serverless Containers<br/>Auto-scaling"]
-        ManagedGW["Y.Cloud Gateway<br/>HTTP/2, JWT"]
-        ManagedDB["Managed PostgreSQL"]
+        ManagedGW["Y.Cloud Gateway<br/>(Envoy Managed)"]
+
+        Containers["Serverless Containers<br/>(Ktor, Casdoor)"]
+        ManagedDB[("Managed PostgreSQL<br/>(ads_db, casdoor_db)")]
+        S3["Object Storage / CDN<br/>(Static Assets)"]
     end
-    
-    CDN --> ManagedGW
-    Containers --> ManagedGW
+
+%% Потоки трафика
+    ManagedGW -->|API Requests| Containers
+    ManagedGW -->|UI Assets| S3
+
+%% Внутренние связи
     Containers --> ManagedDB
 ```
 
@@ -171,7 +198,6 @@ graph TB
 graph LR
     subgraph "External Providers"
         Email["Email Provider<br/>SMTP/API"]
-        IdP["Casdoor (managed)"]
     end
 ```
 
@@ -180,10 +206,10 @@ graph LR
 ```mermaid
 graph LR
     subgraph "Versions"
-        Kotlin["Kotlin 1.9.x"]
-        Ktor["Ktor 2.3.x"]
-        Compose["Compose Multiplatform 1.5.x"]
-        Postgres["PostgreSQL 15+"]
+        Kotlin["Kotlin (latest)"]
+        Ktor["Ktor (latest)"]
+        Compose["Compose Multiplatform (latest)"]
+        Postgres["PostgreSQL (15+)"]
         Envoy["Envoy (Latest)"]
         Casdoor["Casdoor (Latest)"]
     end
