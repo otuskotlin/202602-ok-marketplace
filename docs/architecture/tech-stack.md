@@ -156,7 +156,7 @@ graph TB
 ```mermaid
 graph LR
     subgraph "Authentication"
-        OAuth["OIDC"]
+        OIDC["OIDC"]
         JWT["JWT Tokens"]
     end
     
@@ -165,7 +165,7 @@ graph LR
         ABAC["ABAC"]
     end
     
-    OAuth --> JWT
+    OIDC --> JWT
     JWT --> RBAC
     JWT --> ABAC
 ```

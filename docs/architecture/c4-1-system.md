@@ -91,7 +91,7 @@ C4Context
     Person(user, "Пользователь", "Продавец или Покупатель")
 
     System_Boundary(infra, "Слой доступа") {
-        System_Ext(iam, "IAM (Identity Management)", "OIDC / OAuth2", "Управление аккаунтами и ролями")
+        System_Ext(iam, "IAM (Identity Management)", "OIDC", "Управление аккаунтами и ролями")
         System_Ext(api_gw, "API Gateway", "Envoy", "Единая точка входа")
     }
 

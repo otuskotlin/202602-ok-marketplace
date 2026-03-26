@@ -82,13 +82,13 @@ AD Service
 | **Название**         | Auth Microfrontend                                                                   |
 | **Тип**              | Контейнер (микрофронтенд)                                                            |
 | **Технология**       | Compose Multiplatform Module                                                         |
-| **Назначение**       | UI-модуль аутентификации: логин, регистрация, восстановление пароля, OAuth          |
+| **Назначение**       | UI-модуль аутентификации: логин, регистрация, восстановление пароля, OIDC          |
 | **Статус**           | **MVP**                                                                              |
-| **Ответственность**  | - Экраны входа и регистрации<br>- Social login (Google, GitHub)<br>- Валидация форм<br>- Передача OAuth flow в IAM |
+| **Ответственность**  | - Экраны входа и регистрации<br>- Social login (Google, GitHub)<br>- Валидация форм<br>- Передача OIDC flow в IAM |
 
 **Связи:**
 - Shell Web App → lazy-load → Auth Microfrontend
-- Auth Microfrontend → API Gateway → IAM (Casdoor) — OAuth/OIDC flow
+- Auth Microfrontend → API Gateway → IAM (Casdoor) — OIDC flow
 
 ### 2.5 Ad Microfrontend
 
@@ -246,7 +246,7 @@ Verification Service
 | **Технология**       | Casdoor                                                                                                       |
 | **Назначение**       | Провайдер аутентификации; управление пользователями; выпуск JWT                                               |
 | **Порт**             | 8000 (внутренний)                                                                                             |
-| **Протоколы**       | OIDC / OAuth 2.0                                                                                              |
+| **Протоколы**       | OIDC                                                                                              |
 | **Ответственность**  | - Регистрация и вход пользователей<br>- Управление организациями<br>- Выпуск и валидация JWT-токенов<br>- SSO |
 
 ### 2.14 PostgreSQL (AD Service DB)
@@ -300,7 +300,7 @@ C4Container
         Container(shell, "Shell Web App", "Compose/JS", "Хост-приложение (Layout, Навигация, Auth-bridge, Lazy-loading)")
 
         Container_Boundary(mfe_layer, "Micro-frontends") {
-            Container(auth_mfe, "Auth Microfrontend", "Compose Module", "UI: Login, Register, OAuth")
+            Container(auth_mfe, "Auth Microfrontend", "Compose Module", "UI: Login, Register, OIDC")
             Container(ad_mfe, "Ad Microfrontend", "Compose Module", "UI: Поиск, карточки, подача")
             Container(profile_mfe, "Profile Microfrontend", "Compose Module", "UI: Профиль, избранное (Roadmap)")
             Container(chat_mfe, "Chat Microfrontend", "Compose Module", "UI: Окно чата, диалоги (Roadmap)")
@@ -328,7 +328,7 @@ C4Container
 
     Rel_Down(api_gw, ad_service, "API: /api/ad/v1/*", "HTTP2")
     Rel_Down(api_gw, chat_service, "API: /api/chat/v1/*", "HTTP2/WS")
-    Rel_Down(api_gw, iam, "OAuth/OIDC", "HTTPS")
+    Rel_Down(api_gw, iam, "OIDC", "HTTPS")
 
 %% Внутренние связи
     Rel_Right(shell, auth_mfe, "Lazy-load")
@@ -337,7 +337,7 @@ C4Container
     Rel_Right(shell, chat_mfe, "Lazy-load")
 
 %% MFE → API Gateway
-    Rel_Up(auth_mfe, api_gw, "OAuth flow", "HTTPS")
+    Rel_Up(auth_mfe, api_gw, "OIDC flow", "HTTPS")
     Rel_Up(ad_mfe, api_gw, "Запросы данных", "JSON/JWT")
     Rel_Up(profile_mfe, api_gw, "Запросы данных", "JSON/JWT")
     Rel_Up(chat_mfe, api_gw, "Запросы данных", "JSON/JWT")
@@ -535,5 +535,4 @@ graph LR
 
 *Document Version: 5.0*  
 *Created: 2026-03-26*  
-*Status: Готово к review*  
-*Changes: Микрофронтенды перенесены из C4-3. Добавлены контейнеры: Shell Web App, Auth MFE, Ad MFE, Profile MFE, Chat MFE. Диаграмма обновлена.*
+*Status: Готово к review*
