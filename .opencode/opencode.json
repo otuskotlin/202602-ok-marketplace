@@ -1,0 +1,88 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "orchestrator",
+  "instructions": [".opencode/AGENTS.md"],
+  "agent": {
+    "orchestrator": {
+      "description": "Orchestrator. Управляет процессом через Gate'ы",
+      "mode": "primary",
+      "prompt": "{file:agents/orchestrator.md}",
+      "tools": {
+        "read": true,
+        "glob": true,
+        "grep": true,
+        "task": true,
+        "write": false,
+        "edit": false,
+        "bash": false
+      }
+    },
+    "product-owner": {
+      "description": "Product Owner. Бизнес-сторона: Vision, ЦА, CJM, монетизация",
+      "mode": "subagent",
+      "prompt": "{file:agents/product-owner.md}",
+      "tools": {
+        "read": true,
+        "glob": true,
+        "grep": true,
+        "write": true,
+        "edit": true,
+        "websearch": true,
+        "codesearch": true
+      }
+    },
+    "architect": {
+      "description": "Architect. Техническое проектирование: C4, ERD, ADR, API",
+      "mode": "subagent",
+      "prompt": "{file:agents/architect.md}",
+      "tools": {
+        "read": true,
+        "glob": true,
+        "grep": true,
+        "write": true,
+        "edit": true,
+        "websearch": true,
+        "codesearch": true
+      }
+    },
+    "executor": {
+      "description": "Executor. TDD Engine — Red-Green-Refactor",
+      "mode": "subagent",
+      "prompt": "{file:agents/executor.md}",
+      "tools": {
+        "read": true,
+        "glob": true,
+        "grep": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "reviewer": {
+      "description": "Reviewer. Quality Gate — аудит кода и тестов",
+      "mode": "subagent",
+      "prompt": "{file:agents/reviewer.md}",
+      "tools": {
+        "read": true,
+        "glob": true,
+        "grep": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "release-agent": {
+      "description": "Release Agent. CI/CD и деплой",
+      "mode": "subagent",
+      "prompt": "{file:agents/release-agent.md}",
+      "tools": {
+        "read": true,
+        "glob": true,
+        "grep": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    }
+  }
+}
