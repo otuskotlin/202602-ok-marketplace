@@ -1,8 +1,16 @@
 # ADR-002: Выбор базы данных для MVP B2B маркетплейса
 
-## Context
+## Статус: ПРИНЯТО
 
-Implements [REQ-NNN](../requirements/REQ-NNN.md).
+## Реализует требования
+- [REQ-002: Создание OFFER](../business/requirements/REQ-002.md)
+- [REQ-003: Создание REQUEST](../business/requirements/REQ-003.md)
+- [REQ-004: Matching](../business/requirements/REQ-004.md)
+- [REQ-005: Каталог и поиск](../business/requirements/REQ-005.md)
+
+## Контекст
+
+Реализует требования к базе данных для MVP B2B маркетплейса.
 
 Для MVP B2B маркетплейса требуется база данных, обеспечивающая:
 
@@ -26,9 +34,9 @@ Casdoor НЕ поддерживает:
 
 Это критичный критерий: выбранная БД должна быть совместима с Casdoor.
 
-## Comparison
+## Сравнение
 
-Comparing candidates against B2B критериям:
+Сравнение кандидатов по критериям B2B:
 
 | Критерий | PostgreSQL | MySQL | CockroachDB | YDB |
 |----------|:----------:|:-----:|:-----------:|:---:|
@@ -51,11 +59,11 @@ Comparing candidates against B2B критериям:
 | **Casdoor compatibility** | ✅ | ✅ | ❌ | ❌ |
 | **Cost optimization MVP** | 🟡 | 🟡 | 🟡 | ✅ |
 
-## Decision
+## Решение
 
 **Выбрано:** PostgreSQL
 
-## Rationale
+## Обоснование
 
 Почему выбран этот вариант. Ссылка на сценарий из REQ:
 
@@ -97,9 +105,9 @@ Comparing candidates against B2B критериям:
    - MySQL совместим, но PostgreSQL предлагает лучший Kotlin developer experience
    - PostgreSQL обеспечивает баланс гибкости, ACID, Casdoor-совместимости и developer experience
 
-## Consequences
+## Последствия
 
-### Positive
+### Позитивные
 - Casdoor-совместимость из коробки (required для B2B auth)
 - Типобезопасный Kotlin-опыт (Exposed DSL)
 - Гибкость схемы без миграций для evolving specs
@@ -108,21 +116,21 @@ Comparing candidates against B2B критериям:
 - ACID compliance для финансовых операций
 - Отличная документация и community
 
-### Negative
+### Негативные
 - Managed PostgreSQL в Y.Cloud не true serverless (нужен always-on инстанс)
 - JSON-поля требуют понимания стратегий индексации
 - Стоимость выше чем YDB (но приемлемо для MVP)
 
-### Risks
+### Риски
 
-| Risk | Likelihood | Impact | Mitigation |
+| Риск | Вероятность | Влияние | Митигация |
 |------|------------|--------|------------|
 | Cold start в serverless контейнере | Medium | Medium | Keep-alive strategies, connection pooling |
 | JSON query performance без индексов | Medium | High | Создавать индексы на этапе разработки |
 | Schema drift (JSON fields uncontrolled) | Low | Medium | JSON Schema validation + documentation |
 | Cost при scale (100k+ requests/day) | Low | Medium | YDB миграция когда понадобится |
 
-### Alternatives Considered
+### Рассмотренные альтернативы
 
 Если в будущем понадобится полный serverless:
 - **YDB**: для Serverless-native deployment с pay-per-request (но Casdoor требует отдельный PostgreSQL/MySQL)

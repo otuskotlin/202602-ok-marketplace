@@ -1,8 +1,8 @@
-# Technology Stack — MVP
+# Стек технологий — MVP
 
-> **Status**: MVP-Optimized (2 Services)
+> **Статус**: MVP-оптимизировано (2 сервиса)
 
-## Overview
+## Обзор
 
 ```mermaid
 graph TB
@@ -15,17 +15,17 @@ graph TB
     end
     
     subgraph "Backend Layer (MVP)"
-        MS["Marketplace Service<br/>Kotlin/Ktor"]
+        MS["AD Service<br/>Kotlin/Ktor"]
         CD["IAM<br/>Casdoor/OIDC"]
     end
     
     subgraph "Data Layer (MVP)"
-        DB1["PostgreSQL<br/>Marketplace DB"]
+        DB1["PostgreSQL<br/>Ads DB"]
         DB2["PostgreSQL<br/>Casdoor DB"]
     end
     
     subgraph "External"
-        Email["Email Provider"]
+        Email["Почтовый провайдер"]
     end
     
     Frontend --> Gateway
@@ -36,23 +36,23 @@ graph TB
     MS --> Email
 ```
 
-## Technology Stack Summary (MVP)
+## Сводка по стеку технологий (MVP)
 
 ```mermaid
 graph LR
     subgraph "Layers"
-        Client["Client/Frontend"]
+        Client["Клиент/Фронтенд"]
         Gateway["API Gateway"]
-        Backend["Backend Services"]
-        Data["Database"]
-        Auth["Auth/Authorization"]
+        Backend["Backend Сервисы"]
+        Data["База данных"]
+        Auth["Аутентификация/Авторизация"]
     end
     
     subgraph "Technologies (MVP)"
         FE["Kotlin<br/>Compose Multiplatform"]
         GW["Envoy Gateway<br/>Y.Cloud"]
-%%        MS["Marketplace Service<br/>Kotlin/Ktor"]
-        subgraph MS ["Marketplace Service (Kotlin/Ktor)"]
+%%        MS["AD Service<br/>Kotlin/Ktor"]
+        subgraph MS ["AD Service (Kotlin/Ktor)"]
             Logic["Бизнес-логика"]
             CB["Casbin (Policy Engine)"]
             Logic --> CB
@@ -76,7 +76,7 @@ graph LR
     MS --> CB
 ```
 
-## Frontend
+## Фронтенд
 
 ```mermaid
 graph TB
@@ -88,7 +88,7 @@ graph TB
     end
 ```
 
-## Backend Services (MVP)
+## Backend Сервисы (MVP)
 
 ```mermaid
 graph TB
@@ -139,7 +139,7 @@ graph LR
     HTTP2 --> Auth
 ```
 
-## Database (MVP)
+## База данных (MVP)
 
 ```mermaid
 graph TB
@@ -151,7 +151,7 @@ graph TB
     end
 ```
 
-## Authentication & Authorization
+## Аутентификация и авторизация
 
 ```mermaid
 graph LR
@@ -170,7 +170,7 @@ graph LR
     JWT --> ABAC
 ```
 
-## Deployment
+## Развёртывание
 
 ```mermaid
 graph TD
@@ -192,7 +192,7 @@ graph TD
     Containers --> ManagedDB
 ```
 
-## External Services (MVP)
+## Внешние сервисы (MVP)
 
 ```mermaid
 graph LR
@@ -201,7 +201,7 @@ graph LR
     end
 ```
 
-## Version Information (MVP)
+## Информация о версиях (MVP)
 
 ```mermaid
 graph LR
@@ -217,6 +217,6 @@ graph LR
 
 ---
 
-*Document Version: 2.0 (MVP)*
-*Created: 2026-03-26*
-*Status: Ready for review*
+*Версия документа: 2.0 (MVP)*
+*Создано: 2026-03-26*
+*Статус: Готов к проверке*
