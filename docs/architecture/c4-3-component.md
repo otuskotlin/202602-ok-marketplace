@@ -2,7 +2,7 @@
 
 ## Level 3: Component Diagrams (MVP)
 
-> **Note on Architecture**: This is MVP-Optimized. Microservices reduced to single Marketplace Service.
+> **Note on Architecture**: This is MVP-Optimized. Single AD Service for ads management.
 
 ### 3.0 Micro-frontends Architecture (MVP)
 
@@ -14,11 +14,11 @@ graph TB
     
     subgraph "Micro-frontends (MVP - Lazy Loaded)"
         MF1[("Auth Microfrontend<br/>Login, Register")]
-        MF2[("Ad Microfrontend<br/>Offers, Requests, Matching")]
+        MF2[("Ad Microfrontend<br/>Ads CRUD, Search")]
     end
     
     subgraph "Backend Services"
-        MS["Marketplace Service"]
+        MS["AD Service"]
         CD["Casdoor"]
     end
     
@@ -41,12 +41,12 @@ graph TB
 graph LR
     subgraph "Micro-frontends"
         AuthMFE["Auth MFE<br/>Login, Register, Password Recovery"]
-        AdMFE["Ad MFE<br/>Offer CRUD, Request CRUD, Matching UI"]
+        AdMFE["Ad MFE<br/>Ad CRUD, Search, Filters"]
     end
     
     subgraph "Backend Services"
         CD["Casdoor"]
-        MS["Marketplace Service"]
+        MS["AD Service"]
     end
     
     AuthMFE --> CD
@@ -75,8 +75,7 @@ C4Component
     
     Container_Boundary(mf_ad, "Ad Microfrontend (MVP)") {
         Component(ad_theme, "Ad Theme", "Kotlin", "Ad theming")
-        Component(ad_offer_screens, "Offer Screens", "Kotlin", "Create, List, Detail")
-        Component(ad_request_screens, "Request Screens", "Kotlin", "Create, List, Detail")
+        Component(ad_screens, "Ad Screens", "Kotlin", "Create, List, Detail")
         Component(ad_catalog, "Catalog & Search", "Kotlin", "Search, Filters, Categories")
     }
     
@@ -95,47 +94,38 @@ C4Component
     Rel(auth_screens, common_api, "API calls")
     Rel(auth_screens, common_state, "State")
     
-    Rel(shell_router, ad_offer_screens, "Route")
-    Rel(shell_router, ad_request_screens, "Route")
+    Rel(shell_router, ad_screens, "Route")
     Rel(shell_router, ad_catalog, "Route")
-    Rel(ad_offer_screens, common_api, "API calls")
-    Rel(ad_offer_screens, common_state, "State")
+    Rel(ad_screens, common_api, "API calls")
+    Rel(ad_screens, common_state, "State")
     
     Rel(common_api, backend, "REST")
 ```
 
 ---
 
-### 3.2 Marketplace Service (MVP)
-
-> **Note**: Combined Ad Service + Notification Service into single service for MVP
+### 3.2 AD Service (MVP)
 
 ```mermaid
 C4Component
-    ContainerDb(db_marketplace, "PostgreSQL - Marketplace DB", "JDBC", "SQL")
+    ContainerDb(db_ad, "PostgreSQL - AD DB", "JDBC", "SQL")
     Container(ext_auth, "Casdoor", "HTTP", "Auth")
     Container(ext_email, "Email Provider", "SMTP", "Email")
     
     %% Controllers
-    Component(controller_offer, "Offer Controller", "Kotlin/Ktor", "REST: CRUD OFFER")
-    Component(controller_request, "Request Controller", "Kotlin/Ktor", "REST: CRUD REQUEST")
-    Component(controller_matching, "Matching Controller", "Kotlin/Ktor", "Matching status")
-    Component(controller_company, "Company Controller", "Kotlin/Ktor", "Company management")
+    Component(controller_ad, "Ad Controller", "Kotlin/Ktor", "REST: CRUD ads")
     Component(controller_category, "Category Controller", "Kotlin/Ktor", "Categories")
+    Component(controller_company, "Company Controller", "Kotlin/Ktor", "Company management")
     
     %% Services
-    Component(service_offer, "Offer Service", "Kotlin", "Business logic: OFFER")
-    Component(service_request, "Request Service", "Kotlin", "Business logic: REQUEST")
-        Component(service_matching, "Matching Service", "Kotlin", "On-demand matching algorithm")
+    Component(service_ad, "Ad Service", "Kotlin", "Business logic: ads")
     Component(service_company, "Company Service", "Kotlin", "Company management")
     Component(service_notification, "Notification Service", "Kotlin", "Email dispatch")
     
     %% Repositories
-    Component(repository_offer, "Offer Repository", "Kotlin/Exposed", "Data: OFFER")
-    Component(repository_request, "Request Repository", "Kotlin/Exposed", "Data: REQUEST")
+    Component(repository_ad, "Ad Repository", "Kotlin/Exposed", "Data: ads")
     Component(repository_company, "Company Repository", "Kotlin/Exposed", "Data: companies")
     Component(repository_category, "Category Repository", "Kotlin/Exposed", "Data: categories")
-    Component(repository_match, "Match Repository", "Kotlin/Exposed", "Data: matches")
     
     %% Infrastructure
     Component(casbin_enforcer, "Casbin Enforcer", "Kotlin/Casbin", "Authorization")
@@ -143,40 +133,25 @@ C4Component
     Component(email_sender, "Email Sender", "Kotlin", "SMTP sending")
     
     %% Controller -> Service
-    Rel(controller_offer, service_offer, "Uses")
-    Rel(controller_request, service_request, "Uses")
-    Rel(controller_matching, service_matching, "Uses")
+    Rel(controller_ad, service_ad, "Uses")
     Rel(controller_company, service_company, "Uses")
     Rel(controller_category, repository_category, "Uses")
     
     %% Service -> Repository
-    Rel(service_offer, repository_offer, "Data access")
-    Rel(service_request, repository_request, "Data access")
-    Rel(service_matching, repository_match, "Data access")
-    Rel(service_matching, repository_offer, "Read offers")
-    Rel(service_matching, repository_request, "Read requests")
+    Rel(service_ad, repository_ad, "Data access")
     Rel(service_company, repository_company, "Data access")
     
     %% Service -> Auth
-    Rel(service_offer, casbin_enforcer, "Check permissions")
-    Rel(service_request, casbin_enforcer, "Check permissions")
+    Rel(service_ad, casbin_enforcer, "Check permissions")
     Rel(service_company, casbin_enforcer, "Check permissions")
     
-    %% Service -> Matching (On-Demand In-Card Display)
-    Rel(service_matching, repository_match, "Store/retrieve matches")
-    Rel(service_matching, repository_offer, "Read offers")
-    Rel(service_matching, repository_request, "Read requests")
-    
     %% JWT
-    Rel(service_offer, jwt_provider, "Parse JWT")
-    Rel(service_request, jwt_provider, "Parse JWT")
+    Rel(service_ad, jwt_provider, "Parse JWT")
     
     %% Database
-    Rel(repository_offer, db_marketplace, "SQL")
-    Rel(repository_request, db_marketplace, "SQL")
-    Rel(repository_company, db_marketplace, "SQL")
-    Rel(repository_category, db_marketplace, "SQL")
-    Rel(repository_match, db_marketplace, "SQL")
+    Rel(repository_ad, db_ad, "SQL")
+    Rel(repository_company, db_ad, "SQL")
+    Rel(repository_category, db_ad, "SQL")
     
     %% External
     Rel(email_sender, ext_email, "SMTP")
@@ -225,22 +200,22 @@ C4Component
 sequenceDiagram
     participant Client as Frontend
     participant Gateway as Envoy
-    participant Controller as Offer Controller
-    participant Service as Offer Service
+    participant Controller as Ad Controller
+    participant Service as Ad Service
     participant Casbin as Casbin Enforcer
-    participant Repo as Offer Repository
+    participant Repo as Ad Repository
     participant DB as PostgreSQL
     
-    Client->>Gateway: POST /api/v1/offers (JWT)
+    Client->>Gateway: POST /api/v1/ads (JWT)
     Gateway->>Controller: Forward + user_id from JWT
-    Controller->>Service: createOffer(dto, user_id)
-    Service->>Casbin: enforcer.enforce(user_id, "offer", "write")
+    Controller->>Service: createAd(dto, user_id)
+    Service->>Casbin: enforcer.enforce(user_id, "ad", "write")
     Casbin-->>Service: true/false
     alt Разрешено
-        Service->>Repo: insert(offer)
-        Repo->>DB: INSERT INTO offers
+        Service->>Repo: insert(ad)
+        Repo->>DB: INSERT INTO ads
         DB-->>Repo: ID
-        Repo-->>Service: offer
+        Repo-->>Service: ad
         Service-->>Controller: created
         Controller-->>Gateway: 201 Created
         Gateway-->>Client: OK
@@ -256,14 +231,9 @@ sequenceDiagram
 ```mermaid
 erDiagram
     company ||--o{ user : "employees"
-    company ||--o{ offer : "sells"
-    company ||--o{ request : "buys"
+    company ||--o{ ad : "publishes"
     
-    category ||--o{ offer : "has"
-    category ||--o{ request : "has"
-    
-    offer ||--o{ match : "matched_by"
-    request ||--o{ match : "matched_by"
+    category ||--o{ ad : "has"
     
     company {
         uuid id PK
@@ -295,7 +265,7 @@ erDiagram
         timestamp created_at
     }
     
-    offer {
+    ad {
         uuid id PK
         uuid company_id FK
         uuid category_id FK
@@ -306,31 +276,6 @@ erDiagram
         string unit
         int quantity
         jsonb specifications
-        string status
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    request {
-        uuid id PK
-        uuid company_id FK
-        uuid category_id FK
-        string title
-        string description
-        int quantity
-        decimal price_min
-        decimal price_max
-        jsonb requirements
-        string status
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    match {
-        uuid id PK
-        uuid offer_id FK
-        uuid request_id FK
-        string match_type
         string status
         timestamp created_at
         timestamp updated_at
@@ -347,11 +292,12 @@ erDiagram
 | Chat MFE | ✅ | ❌ | Chat UI not in MVP |
 | Analytics Service | ✅ | ❌ | Stats not in MVP |
 | Analytics MFE | ✅ | ❌ | Stats UI not in MVP |
-| Notification Service | Separate | Integrated | Merged into Marketplace |
+| Notification Service | Separate | Integrated | Merged into AD Service |
 | WebSocket Handler | ✅ | ❌ | Real-time not needed |
 
 ---
 
-*Document Version: 2.0 (MVP)*
+*Document Version: 3.0 (MVP)*
 *Created: 2026-03-26*
 *Status: Ready for review*
+*Changes: Убраны Offer, Request, Match контроллеры/сервисы/репозитории. Оставлен только Ad.*

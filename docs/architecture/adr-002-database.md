@@ -7,7 +7,7 @@ Implements [REQ-NNN](../requirements/REQ-NNN.md).
 Для MVP B2B маркетплейса требуется база данных, обеспечивающая:
 
 - **ACID**: транзакционная целостность критична для финансовых операций (orders, payments)
-- **Гибкие схемы**: Offer и Request имеют varying specifications (атрибуты товаров различаются по категориям)
+- **Гибкие схемы**: Ads имеют varying specifications (атрибуты товаров различаются по категориям)
 - **Serverless совместимость**: развёртывание в Y.Cloud Serverless (Cloud Functions / Container)
 - **Kotlin совместимость**: драйверы, ORM, reactive support
 - **Совместимость с Casdoor**: B2B маркетплейс требует авторизации через Casdoor, который хранит свои данные
@@ -69,7 +69,7 @@ Comparing candidates against B2B критериям:
    - Это required criteria для B2B authentication
    - MySQL также поддерживается, но PostgreSQL предпочтительнее для Kotlin экосистемы
 
-3. **Гибкие схемы для Offer/Request specs:**
+3. **Гибкие схемы для Ads specs:**
    - JSON-поля позволяют хранить varying specifications без ALTER TABLE
    - Индексы обеспечивают эффективные запросы по атрибутам
    - 80/20 pattern: frequently queried fields → columns, rest → JSON

@@ -87,8 +87,8 @@ graph TB
 
 ```mermaid
 graph TB
-    subgraph "Marketplace Service"
-        MS["Ktor<br/>Exposed ORM<br/>Casbin RBAC<br/>Matching Engine<br/>Email Notifications"]
+    subgraph "AD Service"
+        MS["Ktor<br/>Exposed ORM<br/>Casbin RBAC<br/>Ads Engine<br/>Email Notifications"]
     end
     
     subgraph "Casdoor"
@@ -125,7 +125,7 @@ graph LR
 ```mermaid
 graph TB
     subgraph "PostgreSQL 15+ (Managed)"
-        DB1["marketplace_db<br/>offers, requests, matches, companies, notifications"]
+        DB1["marketplace_db<br/>ads, companies, notifications"]
         DB2["casdoor_db<br/>users, organizations, sessions, tokens"]
     end
 ```

@@ -1,199 +1,174 @@
-# C4-1: System Context Diagram — Контекст системы
+# C4-1: Диаграмма системного контекста
 
-## Уровень 1: System Context Diagram
+**Уровень:** System Context (C4-1)  
+**Система:** OK Marketplace  
+**Версия:** 3.0  
+**Дата:** 2026-03-26  
+**Статус:** Готово к review
+
+---
+
+## 1. Обзор системы
+
+OK Marketplace — это B2B-платформа для торговли промышленными компонентами.
+
+**Назначение:** Платформа соединяет продавцов (поставщиков компонентов) с покупателями (производственными компаниями),
+обеспечивая интеллектуальное сопоставление спроса и предложения.
+
+**Ключевые возможности:**
+
+- Регистрация и аутентификация пользователей
+- Создание и управление объявлениями (ads)
+- Каталог и поиск по объявлениям
+
+**Границы системы:** Всё, что находится под контролем команды разработки OK Marketplace.
+
+---
+
+## 2. Пользователи
+
+### 2.1 Продавец
+
+| Атрибут                | Описание                                                                         |
+|------------------------|----------------------------------------------------------------------------------|
+| **Роль**               | Продавец                                                                         |
+| **Тип**                | B2B                                                                              |
+| **Представители**      | Производители двигателей, дистрибьюторы электроники, специализированные продавцы |
+| **Цель использования** | Размещение предложений, получение откликов от покупателей, заключение сделок     |
+
+### 2.2 Покупатель
+
+| Атрибут                | Описание                                                                     |
+|------------------------|------------------------------------------------------------------------------|
+| **Роль**               | Покупатель                                                                   |
+| **Тип**                | B2B                                                                          |
+| **Представители**      | Производственные компании, интеграторы, ремонтные службы, малое производство |
+| **Цель использования** | Создание запросов, поиск релевантных предложений, заключение сделок          |
+
+**Важно:** Любой пользователь **всегда** может выступать как в роли продавца, так и покупателя.
+
+---
+
+## 3. Внешние системы
+
+### 3.1 IAM (на базе Casdoor)
+
+| Атрибут        | Описание                                                      |
+|----------------|---------------------------------------------------------------|
+| **Название**   | Управление пользователями/IAM                                 |
+| **Тип**        | Внешний сервис                                                |
+| **Назначение** | Провайдер аутентификации и управления пользователями          |
+| **Функции**    | Управление пользователями, организации, OIDC, SSO, выпуск JWT |
+| **Протокол**   | HTTPS / API                                                   |
+
+### 3.2 Почтовый сервис
+
+| Атрибут        | Описание                                                                 |
+|----------------|--------------------------------------------------------------------------|
+| **Название**   | Почтовый сервис (Email Provider)                                         |
+| **Тип**        | Внешний сервис                                                           |
+| **Назначение** | Отправка email-уведомлений                                               |
+| **Сценарии**   | Регистрация, смена пароля, уведомления о сделках, маркетинговые рассылки |
+| **Протокол**   | SMTP / API                                                               |
+
+### 3.3 SMS-шлюз
+
+| Атрибут        | Описание                                   |
+|----------------|--------------------------------------------|
+| **Название**   | SMS-шлюз                                   |
+| **Тип**        | Внешний сервис                             |
+| **Назначение** | Отправка SMS-сообщений                     |
+| **Сценарии**   | Подтверждение OTP, критические уведомления |
+| **Протокол**   | API                                        |
+
+---
+
+## 4. Диаграмма System Context
 
 ```mermaid
 C4Context
-    Person(user_seller, "Seller", "Industrial components supplier: motor manufacturers, electronics distributors, specialized vendors")
-    Person(user_buyer, "Buyer", "Manufacturing company, integrator, repair service, small production")
-    
-    System_Boundary(marketplace, "OK Marketplace System") {
-        System(marketplace_app, "Marketplace", "B2B platform for industrial components trading", "Enables sellers to create OFFER, buyers to create REQUEST, performs intelligent matching")
+    title Диаграмма системного контекста — OK Marketplace
+    Person(user, "Пользователь", "Продавец или Покупатель")
+
+    System_Boundary(infra, "Слой доступа") {
+        System_Ext(iam, "IAM (Identity Management)", "OIDC / OAuth2", "Управление аккаунтами и ролями")
+        System_Ext(api_gw, "API Gateway", "Envoy", "Единая точка входа")
     }
-    
-    System_Ext(casdoor, "Casdoor", "Authentication and authorization provider", "OAuth 2.0 / OIDC, user management, organizations, JWT tokens")
-    System_Ext(email_provider, "Email Provider", "Email service", "Email delivery for account, OTP, deal notifications (NOT for matching - in-card display)")
-    System_Ext(sms_provider, "SMS Provider", "SMS gateway", "OTP confirmation, critical notifications")
-    
-    Rel(user_seller, marketplace_app, "Registers, creates OFFER, receives matches, chats, confirms deals")
-    Rel(user_buyer, marketplace_app, "Registers, creates REQUEST, selects OFFER, chats, pays")
-    
-    Rel(marketplace_app, casdoor, "Authentication: OAuth 2.0, JWT token validation", "HTTPS")
-    Rel(marketplace_app, email_provider, "Email notifications", "SMTP/API")
-    Rel(marketplace_app, sms_provider, "SMS notifications, OTP", "API")
-    
-    UpdateRelStyle(user_seller, marketplace_app, $offsetX="-80", $offsetY="-20")
-    UpdateRelStyle(user_buyer, marketplace_app, $offsetX="80", $offsetY="-20")
-```
 
-## Data Flows
+    System_Boundary(business_logic, "Бизнес-логика") {
+        System(marketplace_system, "OK Marketplace", "B2B платформа", "Матчинг предложений и запросов")
+    }
 
-### Flow 1: Registration and Authentication
+    System_Boundary(notifications, "Уведомления") {
+        System_Ext(email_provider, "Email Service", "SMTP")
+        System_Ext(sms_provider, "SMS Gateway", "API")
+    }
 
-```mermaid
-sequenceDiagram
-    participant User as Seller/Buyer
-    participant Marketplace as Marketplace
-    participant Casdoor as Casdoor
-    participant DB as PostgreSQL
-    
-    User->>Marketplace: Open application
-    Marketplace->>Casdoor: Redirect for auth
-    Casdoor->>User: Login form
-    User->>Casdoor: Credentials (email/password, social, SSO)
-    Casdoor->>DB: Validate credentials
-    DB-->>Casdoor: User authenticated
-    Casdoor-->>Marketplace: JWT token
-    Marketplace-->>User: Access granted
-```
+    Rel_Down(user, api_gw, "Запросы к API", "HTTPS")
+    Rel_Down(user, iam, "Логин / Регистрация", "OIDC")
+    Rel_Down(api_gw, marketplace_system, "Проксирует трафик", "gRPC/HTTP")
+    Rel_Right(marketplace_system, iam, "Проверяет токены", "Backchannel")
+    Rel_Down(marketplace_system, email_provider, "Отправка писем")
+    Rel_Down(marketplace_system, sms_provider, "Отправка SMS")
+    UpdateRelStyle(user, api_gw, $offsetY="-20")
+    UpdateRelStyle(user, iam, $offsetX="20")
 
-### Flow 2: Create OFFER (Seller)
-
-```mermaid
-sequenceDiagram
-    participant Seller
-    participant Marketplace
-    participant Casdoor as Casdoor
-    participant DB as PostgreSQL
-    
-    Seller->>Marketplace: Fill product card
-    Marketplace->>Casdoor: Validate JWT token
-    Casdoor-->>Marketplace: Token valid
-    Marketplace->>DB: Save OFFER to PostgreSQL
-    DB-->>Marketplace: OFFER created
-    Marketplace->>Marketplace: Trigger matching algorithm
-```
-
-### Flow 3: Create REQUEST (Buyer)
-
-```mermaid
-sequenceDiagram
-    participant Buyer
-    participant Marketplace
-    participant Casdoor as Casdoor
-    participant Matcher as Matching Algorithm
-    
-    Buyer->>Marketplace: Create product request
-    Marketplace->>Casdoor: Validate token
-    Casdoor-->>Marketplace: Token valid
-    Marketplace->>Matcher: Run matching algorithm
-    Matcher-->>Marketplace: Relevant OFFERs found
-    Marketplace-->>Buyer: Display matching offers
-```
-
-### Flow 4: Notifications
-
-```mermaid
-sequenceDiagram
-    participant Marketplace
-    participant Email as Email Provider
-    participant SMS as SMS Provider
-    participant User as User
-    
-    Marketplace->>Email: New match notification
-    Email-->>User: Email sent
-    Marketplace->>SMS: OTP confirmation
-    SMS-->>User: SMS sent
-    Marketplace->>Email: Deal status change
-    Email-->>User: Email sent
-```
-
-## System Boundaries
-
-```mermaid
-graph TB
-    subgraph "Inside Boundaries (Team Responsibility)"
-        Frontend["Frontend<br/>Compose Multiplatform"]
-        AdService["Ad Service"]
-        ChatService["Chat Service"]
-        NotifService["Notification Service"]
-        AnalyticsService["Analytics Service"]
-        DB["PostgreSQL<br/>5 Logical DBs"]
-    end
-    
-    subgraph "Outside Boundaries (External Dependencies)"
-        Casdoor["Casdoor<br/>Auth Service"]
-        EmailProvider["Email Provider"]
-        SMSProvider["SMS Provider"]
-    end
-    
-    Frontend --> AdService
-    Frontend --> ChatService
-    AdService --> Casdoor
-    ChatService --> Casdoor
-    NotifService --> EmailProvider
-    NotifService --> SMSProvider
-```
-
-## Technology Stack at System Level
-
-```mermaid
-graph LR
-    subgraph "Frontend"
-        FE["Kotlin<br/>Compose Multiplatform Web"]
-    end
-    
-    subgraph "API Gateway"
-        GW["Envoy Gateway<br/>Y.Cloud"]
-    end
-    
-    subgraph "Backend"
-        BS["Kotlin<br/>Ktor Microservices"]
-    end
-    
-    subgraph "SgAuth"
-        Auth["Casdoor<br/>Go, OAuth2/OIDC"]
-    end
-    
-    subgraph "Database"
-        DB["PostgreSQL 15+<br/>5 Logical DBs"]
-    end
-    
-    subgraph "Authorization"
-        Perm["Casbin<br/>RBAC/ABAC"]
-    end
-    
-    FE --> GW
-    GW --> BS
-    BS --> Auth
-    BS --> DB
-    BS --> Perm
-```
-
-## Security Architecture
-
-```mermaid
-graph TB
-    subgraph "Client"
-        Browser["Browser<br/>HTTPS"]
-    end
-    
-    subgraph "Security Layer"
-        TLS["TLS 1.3"]
-        JWT["JWT Token<br/>Short lifetime"]
-    end
-    
-    subgraph "Authentication"
-        Casdoor["Casdoor<br/>OAuth 2.0 / OIDC"]
-    end
-    
-    subgraph "Authorization"
-        Casbin["Casbin<br/>RBAC"]
-    end
-    
-    subgraph "Data Isolation"
-        OrgIso["Organization<br/>Isolation"]
-    end
-    
-    Browser --> TLS
-    TLS --> JWT
-    JWT --> Casdoor
-    Casdoor --> Casbin
-    Casbin --> OrgIso
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
 
 ---
 
-*Document Version: 1.0*
-*Created: 2026-03-24*
-*Status: Ready for review*
+## 5. Потоки данных
+
+### 5.1 Регистрация и аутентификация
+
+```mermaid
+sequenceDiagram
+    participant User as Продавец/Покупатель
+    participant Marketplace as Маркетплейс
+    participant iam as IAM
+    User ->> Marketplace: Открыть приложение
+    Marketplace ->> iam: Перенаправление для аутентификации
+    iam ->> User: Форма входа
+    User ->> iam: Учётные данные (email/password, соцсети)
+    iam -->> Marketplace: JWT токен
+    Marketplace -->> User: Доступ предоставлен
+```
+
+### 5.2 Создание объявления
+
+```mermaid
+sequenceDiagram
+    participant Seller as Пользователь
+    participant Gateway as API Gateway
+    participant Marketplace as Маркетплейс
+    participant iam as IAM
+    Seller ->> Gateway: Заполнить данные объявления
+    Gateway ->> Gateway: Валидация JWT
+    Gateway ->> Marketplace: Запрос пользователя
+    Marketplace ->> Marketplace: Проверить права (Casbin), сохранить Объявление
+    Marketplace -->> Seller: Объявление создано
+```
+
+---
+
+## 6. Границы системы
+
+| Зона              | Компоненты                                                  | Ответственность                                  |
+|-------------------|-------------------------------------------------------------|--------------------------------------------------|
+| **Внутри границ** | Маркетплейс (микросервисы), Шлюз, Управление пользователями | Полный контроль команды разработки               |
+| **Вне границ**    | Почтовый сервис, SMS-шлюз                                   | Внешние зависимости, неподконтрольные компоненты |
+
+---
+
+## 7. Ключевые допущения
+
+1. **Универсальная роль пользователя** — В MVP один пользователь может выступать как в роли продавца, так и покупателя.
+
+---
+
+*Document Version: 3.0*  
+*Created: 2026-03-26*  
+*Status: Готово к review*  
+*Changes: Переработана диаграмма System Context — удалён Gateway как деталь реализации; документ сосредоточен на
+пользователях, системе и внешних интеграциях*
