@@ -15,3 +15,4 @@ include("m2l1-dsl")
 
 include("m2l2-coroutines")
 include("m2l3-flows")
+include("m2l4-kmp")
