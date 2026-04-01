@@ -26,3 +26,5 @@ pluginManagement {
 //include(":ok-marketplace-lib-logging-socket")
 include(":ok-marketplace-dcompose")
 include(":ok-marketplace-specs")
+include(":ok-marketplace-migration-cs")
+include(":ok-marketplace-migration-pg")
