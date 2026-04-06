@@ -8,3 +8,4 @@ pluginManagement {
 rootProject.name = "otuskotlin-marketplace-202602"
 
 includeBuild("lessons")
+includeBuild("ok-marketplace-be")
