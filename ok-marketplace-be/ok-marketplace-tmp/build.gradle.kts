@@ -1,7 +1,5 @@
 plugins {
-    //id("build-jvm")
-    //kotlin("jvm")
-    alias(libs.plugins.kotlin.jvm)
+    id("build-jvm")
 }
 
 dependencies {

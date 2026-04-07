@@ -6,9 +6,3 @@ plugins {
 group = "com.otus.otuskotlin.marketplace"
 version = "0.0.1"
 
-subprojects {
-    repositories {
-        mavenCentral()
-    }
-}
-
