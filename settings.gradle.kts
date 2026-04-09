@@ -7,10 +7,5 @@ pluginManagement {
 
 rootProject.name = "otuskotlin-marketplace-202602"
 
-include("m1l1-first")
-include("m1l2-basic")
-include("m1l3-func")
-include("m1l4-oop")
-include("m2l1-dsl")
-
-include("m2l2-coroutines")
+includeBuild("lessons")
+includeBuild("ok-marketplace-be")
