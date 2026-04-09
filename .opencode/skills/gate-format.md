@@ -29,7 +29,7 @@
 - [Известные риски]
 
 ## Артефакты
-- [REQ-NNN](../docs/requirements/REQ-NNN.md)
+- [BR-NNN](../docs/business/BR-NNN.md)
 - [ADR-NNN](../docs/adr/ADR-NNN.md)
 
 ---
@@ -93,7 +93,7 @@ Coverage: YY%
 - [Опционально: мелкие улучшения]
 
 ## Артефакты
-- [REQ-NNN](../docs/requirements/REQ-NNN.md)
+- [BR-NNN](../docs/business/BR-NNN.md)
 - [ADR-NNN](../docs/adr/ADR-NNN.md)
 - [Код в feature/XXX](link)
 

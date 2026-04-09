@@ -1,13 +1,17 @@
+# TARGET DIRECTORY: docs/architecture/ADR/
+# TARGET FILENAME: ADR-[NNN]-[decision_title].md (e.g., ADR-001-use-pg-repo.md)
+# NEXT NUMBER: Sequential from glob(\"docs/architecture/ADR/ADR-*.md\" | wc -l +1)
+
 # ADR-[NNN]: [Тема решения]
 
 ## Context
 
-Implements [REQ-NNN](../requirements/REQ-NNN.md).
+Implements [BR-NNN](../business/BR-NNN.md).
 [Краткое описание проблемы для решения]
 
 ## Comparison
 
-Comparing candidates against [REQ-NNN](../requirements/REQ-NNN.md):
+Comparing candidates against [BR-NNN](../business/BR-NNN.md):
 
 | Criteria | [Option A](../proposals/OPT-A-name.md) | [Option B](../proposals/OPT-B-name.md) |
 |----------|:---:|:---:|
@@ -21,7 +25,7 @@ Comparing candidates against [REQ-NNN](../requirements/REQ-NNN.md):
 
 ## Rationale
 
-[Почему выбран этот вариант. Ссылка на сценарий из REQ]
+[Почему выбран этот вариант. Ссылка на сценарий из BR]
 
 ## Consequences
 

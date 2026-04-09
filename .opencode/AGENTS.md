@@ -35,7 +35,21 @@
 ### 1. Orchestrator
 **Роль:** Координатор потока
 **Инструменты:** task, read, glob, grep
-**Ограничения:** НЕ пишет код
+**Ограничения:** НЕ пишет код, НЕ использует write/edit/bash
+**ЗАПРЕЩЕНО:** Самостоятельно выполнять задачи, создавать файлы, писать код
+
+ДЕЛЕГИРОВАНИЕ:
+- Бизнес-требования → product-owner через task()
+- Технический дизайн → architect через task()
+- Реализация → executor через task()
+- Код-ревью → reviewer через task()
+- Деплой → release-agent через task()
+
+ПРАВИЛА:
+- ВСЕГДА делегировать задачи ответственным агентам
+- НИКОГДА не создавать файлы самостоятельно
+- НИКОГДА не запускать bash команды
+- ЖДАТЬ подтверждения человека у каждого Gate
 
 ### 2. Product Owner
 **Роль:** Бизнес-анализ
@@ -82,6 +96,34 @@
 ---
 
 ## Rollback
+
+**Rollback rules:**
+
+```
+Gate 2 Reject:
+├─ "Бизнес-план" → product-owner
+├─ "Техника" → architect
+└─ "Реализация" → executor
+
+Gate 3 Reject:
+└─ К нужному этапу
+```
+
+---
+
+## Critical Guardrails
+
+**ORCHESTRATOR MUST:**
+- Delegate all work via task() to responsible agents
+- NEVER write/edit files directly
+- NEVER run bash commands
+- ONLY read/verify work done by other agents
+- Wait for Gate approval before proceeding
+
+**WHY THESE GUARDRAILS:**
+- Prevents Orchestrator from doing work itself
+- Ensures proper separation of concerns
+- Prevents hallucinated file creation
 
 ```
 Gate 2 Reject:
