@@ -15,7 +15,7 @@ MANDATORY FILES TO CREATE:
 1. docs/BUSINESS_VISION.md - Product vision, goals, TAM/SAM/SOM
 2. docs/CUSTOMER_PERSONAS.md - User personas, target audiences
 3. docs/CUSTOMER_JOURNEY.md - CJM with Mermaid diagrams
-4. docs/business/BR-001.md - First Business Requirement (use BR-template.md)
+4. docs/business/BR/BR-*.md - Complete set of all Business Requirements (use BR-template.md)
 
 FILE VERSIONING RULES:
 - Git handles versioning - you DON'T create files with suffixes like UPDATED, FINAL, v2, etc.
