@@ -3,7 +3,7 @@
 ## Порядок работы с документами
 
 ### 1. Vision & Strategy
-- [VISION.md](VISION.md)
+- [BUSINESS_VISION.md](BUSINESS_VISION.md)
 - [MARKET_ANALYSIS.md](MARKET_ANALYSIS.md)
 - [COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md)
 - [GOALS.md](GOALS.md)
