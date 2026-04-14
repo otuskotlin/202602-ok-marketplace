@@ -93,7 +93,7 @@ internal abstract class AdRepoBaseV2Test {
         ),
         MkplContext(
             state = MkplState.RUNNING,
-            adResponse = MkplAdStub.get().apply { permissionsClient.clear() },
+            adResponse = MkplAdStub.prepareResult { permissionsClient.clear() },
             adsResponse = MkplAdStub.prepareSearchList("xx", MkplDealSide.SUPPLY)
                 .onEach { it.permissionsClient.clear() }
                 .sortedBy { it.id.asString() }

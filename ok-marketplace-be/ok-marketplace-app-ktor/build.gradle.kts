@@ -68,6 +68,8 @@ kotlin {
                 implementation(libs.ktor.serialization.json)
 
                 // DB
+                implementation(libs.uuid)
+                implementation(projects.okMarketplaceRepoCommon)
                 implementation(projects.okMarketplaceRepoStubs)
                 implementation(projects.okMarketplaceRepoInmemory)
 
@@ -112,6 +114,8 @@ kotlin {
 
                 implementation("ru.otus.otuskotlin.marketplace.libs:ok-marketplace-lib-logging-logback")
 
+                implementation(projects.okMarketplaceRepoPgjvm)
+                implementation(libs.testcontainers.postgres)
             }
         }
 

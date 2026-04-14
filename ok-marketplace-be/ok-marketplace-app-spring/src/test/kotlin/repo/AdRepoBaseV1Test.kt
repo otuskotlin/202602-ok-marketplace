@@ -26,7 +26,7 @@ internal abstract class AdRepoBaseV1Test {
         prepareCtx(MkplAdStub.prepareResult {
             id = MkplAdId(uuidNew)
             ownerId = MkplUserId.NONE
-            lock = MkplAdLock.NONE
+            lock = MkplAdLock(uuidNew)
         })
             .toTransportCreate()
             .copy(responseType = "create")
@@ -51,7 +51,7 @@ internal abstract class AdRepoBaseV1Test {
             ad = MkplAdStub.prepareResult { title = "add" }.toTransportUpdate(),
             debug = debug,
         ),
-        prepareCtx(MkplAdStub.prepareResult { title = "add" })
+        prepareCtx(MkplAdStub.prepareResult { title = "add"; lock = MkplAdLock(uuidNew) })
             .toTransportUpdate().copy(responseType = "update")
     )
 
@@ -93,7 +93,7 @@ internal abstract class AdRepoBaseV1Test {
         ),
         MkplContext(
             state = MkplState.RUNNING,
-            adResponse = MkplAdStub.get().apply { permissionsClient.clear() },
+            adResponse = MkplAdStub.prepareResult { permissionsClient.clear() },
             adsResponse = MkplAdStub.prepareSearchList("xx", MkplDealSide.SUPPLY)
                 .onEach { it.permissionsClient.clear() }
                 .sortedBy { it.id.asString() }
