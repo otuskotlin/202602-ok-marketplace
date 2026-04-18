@@ -47,4 +47,5 @@ include(":ok-marketplace-repo-stubs")
 include(":ok-marketplace-repo-tests")
 include(":ok-marketplace-repo-pgsqlx4k")
 include(":ok-marketplace-repo-cassandra")
+include(":ok-marketplace-repo-gremlin")
 
