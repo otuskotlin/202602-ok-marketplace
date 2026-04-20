@@ -16,6 +16,10 @@ Marketplace -- это площадка, на которой пользовате
 
 1. Маркетинг и аналитика
     1. [Бизнес-документация](./docs/01-biz/README.md)
+2. Архитектура
+    1. [ADR](docs/03-architecture/01-adrs.md)
+    2. [Описание API](docs/03-architecture/02-api.md)
+    3. [Архитектурные схемы](docs/03-architecture/03-arch.md)
 
 # Структура проекта
 
