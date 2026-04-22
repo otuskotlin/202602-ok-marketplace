@@ -101,6 +101,10 @@ kotlin {
                  */
                 implementation(projects.okMarketplaceRepoPgsqlx4k)
 
+                // States
+                implementation(libs.mkpl.state.common)
+                implementation(libs.mkpl.state.biz)
+
                 // logging
                 implementation(project(":ok-marketplace-api-log1"))
                 implementation(libs.mkpl.logs.common)

@@ -54,7 +54,7 @@ kotlin {
                 implementation(libs.kotlinx.serialization.core)
                 implementation(libs.kotlinx.serialization.json)
 
-                implementation(project(":ok-marketplace-common"))
+                implementation(projects.okMarketplaceCommon)
             }
         }
         commonTest {

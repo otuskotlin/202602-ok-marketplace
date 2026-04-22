@@ -135,12 +135,13 @@ mkpl-logs-logback = { module = "ru.otus.otuskotlin.marketplace.libs:ok-marketpla
 mkpl-logs-socket = { module = "ru.otus.otuskotlin.marketplace.libs:ok-marketplace-lib-logging-socket", version.ref = "mkpl" }
 mkpl-cor = { module = "ru.otus.otuskotlin.marketplace.libs:ok-marketplace-lib-cor", version.ref = "mkpl" }
 mkpl-sysenv = { module = "ru.otus.otuskotlin.marketplace.libs:ok-marketplace-lib-sysenv", version.ref = "mkpl" }
-mkpl-state-common = { module = "ru.otus.otuskotlin.marketplace.state:ok-marketplace-states-common", version.ref = "mkpl" }
-mkpl-state-biz = { module = "ru.otus.otuskotlin.marketplace.state:ok-marketplace-states-biz", version.ref = "mkpl" }
 
 # Internal modules
 ok-mkpl-dcompose = "ru.otus.otuskotlin.marketplace:ok-marketplace-dcompose:0.1.0"
 ok-mkpl-specs = "ru.otus.otuskotlin.marketplace:ok-marketplace-specs:0.1.0"
+mkpl-state-common = { module = "ru.otus.otuskotlin.marketplace.state:ok-marketplace-states-common", version.ref = "mkpl" }
+mkpl-state-biz = { module = "ru.otus.otuskotlin.marketplace.state:ok-marketplace-states-biz", version.ref = "mkpl" }
+
 
 [bundles]
 exposed = ["db-exposed-core", "db-exposed-dao", "db-exposed-jdbc"]
