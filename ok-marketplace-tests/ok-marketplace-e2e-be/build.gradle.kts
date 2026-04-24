@@ -1,5 +1,6 @@
 plugins {
     id("build-jvm")
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 // 1. Настраиваем конфигурацию для получения файла из другого проекта
@@ -33,6 +34,9 @@ dependencies {
 
     testImplementation(libs.rabbitmq.client)
     testImplementation(libs.kafka.client)
+    testImplementation(libs.kotlinx.serialization.core)
+    testImplementation(libs.kotlinx.serialization.json)
+
 }
 
 var severity: String = "MINOR"

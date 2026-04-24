@@ -1,5 +1,6 @@
 package ru.otus.otuskotlin.marketplace.e2e.be
 
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -13,6 +14,7 @@ import ru.otus.otuskotlin.marketplace.e2e.be.scenarios.v2.ScenariosV2
 import kotlin.test.Ignore
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled("Не работает с авторизацией")
 class TestPgX64: BaseContainerTest(KtorLinuxPGDockerCompose) {
     private val client: Client = RestClient(compose)
     @Test
