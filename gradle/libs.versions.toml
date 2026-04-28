@@ -1,8 +1,8 @@
 [versions]
 kotlin = "2.3.10"
 
-kotlinx-datetime = "0.6.2"
-kotlinx-serialization = "1.8.1"
+kotlinx-datetime = "0.7.1"
+kotlinx-serialization = "1.11.0"
 
 binaryCompabilityValidator = "0.13.2"
 
@@ -22,6 +22,9 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 jackson-datatype = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+
+# Internal modules
+ok-mkpl-specs = "ru.otus.otuskotlin.marketplace:ok-marketplace-specs:0.1.0"
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

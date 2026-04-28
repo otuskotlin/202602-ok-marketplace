@@ -8,7 +8,6 @@ plugins {
 val dockerDir = project.layout.buildDirectory.dir("docker-swagger").get().toString()
 
 docker {
-//    imageName = "${project.name}"
     images.register("Swagger") {
         buildContext = dockerDir
         dockerFile = "Dockerfile"
@@ -25,13 +24,14 @@ val specsFromLib by configurations.creating {
 }
 
 dependencies {
-    specsFromLib("ru.otus.otuskotlin.marketplace:ok-marketplace-specs:0.1.0:spec@zip")
+    specsFromLib("${libs.ok.mkpl.specs.get()}:spec@zip")
 }
 
 val specDir = layout.buildDirectory.dir("specs")
 
 tasks {
-    val extractLibSpecs by registering(Copy::class) {
+    register<Copy>("extractLibSpecs") {
+        description = "Подготовка директории для Dockerfile"
         dependsOn(specsFromLib)
         // Распаковываем ZIP-файл (он будет единственным в этой конфигурации)
         from(specsFromLib.elements.map { it.map { file -> zipTree(file) } })
