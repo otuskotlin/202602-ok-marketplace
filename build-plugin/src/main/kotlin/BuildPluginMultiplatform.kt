@@ -22,13 +22,6 @@ internal class BuildPluginMultiplatform : Plugin<Project> {
         plugins.withId("org.jetbrains.kotlin.multiplatform") {
             extensions.configure<KotlinMultiplatformExtension> {
                 configureTargets(this@with)
-                sourceSets.configureEach {
-                    languageSettings.apply {
-                        languageVersion = "1.9"
-                        progressiveMode = true
-                        optIn("kotlin.time.ExperimentalTime")
-                    }
-                }
             }
         }
         repositories {
@@ -45,18 +38,8 @@ private fun KotlinMultiplatformExtension.configureTargets(project: Project) {
 //        vendor.set(JvmVendorSpec.AZUL)
     }
 
-    jvm {
-        compilations.configureEach {
-            compilerOptions.configure {
-                jvmTarget.set(JvmTarget.valueOf("JVM_${libs.versions.jvm.compiler.get()}"))
-            }
-        }
-    }
+    jvm ()
     linuxX64()
     macosArm64()
     macosX64()
-    project.tasks.withType(JavaCompile::class.java) {
-        sourceCompatibility = libs.versions.jvm.language.get()
-        targetCompatibility = libs.versions.jvm.compiler.get()
-    }
 }

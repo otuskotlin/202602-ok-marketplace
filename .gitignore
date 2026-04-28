@@ -1,8 +1,9 @@
 **/.gradle/
 **/.kotlin/
+/kotlin-js-store/
 **/build/
-!**/src/**/build/
 !gradle/wrapper/gradle-wrapper.jar
+!**/src/**/build/
 
 /.idea/
 /.gigaide/

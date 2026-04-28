@@ -20,12 +20,10 @@ pluginManagement {
     }
 }
 
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
-}
-
 // Включает вот такую конструкцию
 //implementation(projects.m2l5Gradle.sub1.ssub1)
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-include(":ok-marketplace-tmp")
+//include(":ok-marketplace-tmp")
+include(":ok-marketplace-api-v1-jackson")
+include(":ok-marketplace-api-v2-kmp")

@@ -3,40 +3,28 @@ plugins {
     id("maven-publish")
 }
 
-group = "ru.otus.otuskotlin.marketplace.tests"
-version = "0.1.0"
-
-allprojects {
-    repositories {
-        mavenCentral()
-    }
-}
-
-subprojects {
-    group = rootProject.group
-    version = rootProject.version
-}
-
 val resourcesZip = tasks.register<Zip>("resourcesZip") {
+    description = "Упаковка ресурсов в Zip-архив"
     archiveClassifier.set("resources")
+    archiveExtension.set("zip")
     from("dcompose")
+}
+
+// Добавляем артефакт в стандартную конфигурацию runtime,
+// чтобы includeBuild мог его сопоставить при поиске зависимости
+configurations {
+    runtimeElements {
+        outgoing.artifact(resourcesZip)
+    }
 }
 
 // Публикация
 publishing {
-    repositories {
-        maven {
-            name = "LocalRepo"
-            url = uri("${rootProject.projectDir}/build/repo")
-        }
-    }
     publications {
         create<MavenPublication>("maven") {
-            groupId = "ru.otus.otuskotlin.marketplace"
-            artifactId = "dcompose"
-            version = "1.0"
-
-            from(components["java"])
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
 
             artifact(resourcesZip) {
                 classifier = "resources"
