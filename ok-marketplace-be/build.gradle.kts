@@ -6,6 +6,9 @@ plugins {
 group = "ru.otus.otuskotlin.marketplace"
 version = "0.1.0"
 
+val specDir = "${rootDir}/../ok-marketplace-other/ok-marketplace-specs/specs"
+extra["spec-v1"] = "$specDir/specs-ad-v1.yaml"
+
 allprojects {
     repositories {
         mavenCentral()
