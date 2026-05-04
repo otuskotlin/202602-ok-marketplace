@@ -1,13 +1,24 @@
 [versions]
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 
 kotlinx-datetime = "0.7.1"
 kotlinx-serialization = "1.11.0"
+coroutines = "1.10.2"
 
 binaryCompabilityValidator = "0.13.2"
 
 openapi-generator = "7.12.0"
 jackson = "2.18.3"
+
+logback = "1.5.3"
+kotest = "6.1.11"
+kermit = "2.0.3"
+
+#Frameworks
+ktor = "3.4.3"
+
+#Testing
+testcontainers = "2.0.4"
 
 # BASE
 jvm-compiler = "21"
@@ -19,12 +30,32 @@ plugin-binaryCompatibilityValidator = { module = "org.jetbrains.kotlinx:binary-c
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 
 jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 jackson-datatype = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
 
+# Logging
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+
+# Ktor
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+
+# Testing
+kotest-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotest-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
+
+testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+
 # Internal modules
+ok-mkpl-dcompose = "ru.otus.otuskotlin.marketplace:ok-marketplace-dcompose:0.1.0"
 ok-mkpl-specs = "ru.otus.otuskotlin.marketplace:ok-marketplace-specs:0.1.0"
+
+[bundles]
+kotest = ["kotest-junit5", "kotest-core", "kotest-property"]
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

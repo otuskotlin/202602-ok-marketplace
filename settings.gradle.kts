@@ -10,3 +10,4 @@ rootProject.name = "otuskotlin-marketplace-202602"
 //includeBuild("lessons")
 includeBuild("ok-marketplace-other")
 includeBuild("ok-marketplace-be")
+includeBuild("ok-marketplace-tests")
