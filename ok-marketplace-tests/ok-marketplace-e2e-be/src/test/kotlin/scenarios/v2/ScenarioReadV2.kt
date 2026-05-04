@@ -1,6 +1,6 @@
 package ru.otus.otuskotlin.marketplace.e2e.be.scenarios.v2
 
-import io.kotest.engine.runBlocking
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import ru.otus.otuskotlin.marketplace.api.v2.models.*
 import ru.otus.otuskotlin.marketplace.e2e.be.base.client.Client
