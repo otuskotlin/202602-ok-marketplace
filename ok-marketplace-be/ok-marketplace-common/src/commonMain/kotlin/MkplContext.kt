@@ -1,6 +1,6 @@
 package ru.otus.otuskotlin.marketplace.common
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import ru.otus.otuskotlin.marketplace.common.models.*
 import ru.otus.otuskotlin.marketplace.common.stubs.MkplStubs
 

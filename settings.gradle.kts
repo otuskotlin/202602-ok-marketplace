@@ -5,9 +5,13 @@ pluginManagement {
     }
 }
 
-rootProject.name = "otuskotlin-marketplace-202602"
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
+}
+rootProject.name = "ok-marketplace-202511"
 
 //includeBuild("lessons")
-includeBuild("ok-marketplace-other")
 includeBuild("ok-marketplace-be")
+includeBuild("ok-marketplace-other")
 includeBuild("ok-marketplace-tests")
+includeBuild("ok-marketplace-libs")

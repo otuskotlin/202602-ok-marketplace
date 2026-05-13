@@ -4,10 +4,7 @@ plugins {
 }
 
 group = "ru.otus.otuskotlin.marketplace"
-version = "0.1.0"
-
-val specDir = "${rootDir}/../ok-marketplace-other/ok-marketplace-specs/specs"
-extra["spec-v1"] = "$specDir/specs-ad-v1.yaml"
+version = "0.0.1"
 
 allprojects {
     repositories {
@@ -20,23 +17,18 @@ subprojects {
     version = rootProject.version
 }
 
+ext {
+    val specDir = layout.projectDirectory.dir("../ok-marketplace-other/ok-marketplace-specs/specs")
+    set("spec-v1", specDir.file("specs-ad-v1.yaml").toString())
+    set("spec-v2", specDir.file("specs-ad-v2.yaml").toString())
+    set("spec-log1", specDir.file("specs-ad-log1.yaml").toString())
+}
+
 tasks {
     register("build" ) {
-        description = "Сборка всех подпроектов"
         group = "build"
-    }
-    register("clean" ) {
-        description = "Очистка всех подпроектов"
-        group = "build"
-        subprojects.forEach { proj ->
-            println("PROJ $proj")
-            proj.getTasksByName("clean", false).also {
-                this@register.dependsOn(it)
-            }
-        }
     }
     register("check" ) {
-        description = "Запуск тестов всех подпроектов"
         group = "verification"
         subprojects.forEach { proj ->
             println("PROJ $proj")
