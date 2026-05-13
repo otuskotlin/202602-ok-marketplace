@@ -1,6 +1,6 @@
 package ru.otus.otuskotlin.marketplace.logging.common
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
