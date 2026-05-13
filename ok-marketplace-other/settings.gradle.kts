@@ -29,3 +29,4 @@ plugins {
 //include(":ok-marketplace-lib-logging-logback")
 //include(":ok-marketplace-lib-logging-socket")
 include(":ok-marketplace-dcompose")
+include(":ok-marketplace-specs")
