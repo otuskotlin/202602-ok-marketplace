@@ -28,6 +28,15 @@ tasks {
     register("build" ) {
         group = "build"
     }
+    register("clean" ) {
+        group = "build"
+        subprojects.forEach { proj ->
+            println("PROJ $proj")
+            proj.getTasksByName("clean", false).also {
+                this@register.dependsOn(it)
+            }
+        }
+    }
     register("check" ) {
         group = "verification"
         subprojects.forEach { proj ->
@@ -36,5 +45,13 @@ tasks {
                 this@register.dependsOn(it)
             }
         }
+    }
+    register("buildImages") {
+
+        val isLinuxOS = listOf("linux").any { System.getProperty("os.name").lowercase().contains(it) }
+        logger.lifecycle("isLinuxOS: $isLinuxOS")
+
+
+        dependsOn(project("ok-marketplace-app-spring").tasks.getByName("dockerBuildJvm"))
     }
 }

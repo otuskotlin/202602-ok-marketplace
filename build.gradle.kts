@@ -26,9 +26,9 @@ tasks {
         )
     }
 
-//    register("buildImages") {
-//        dependsOn(gradle.includedBuild("ok-marketplace-be").task(":buildImages"))
-//    }
+    register("buildImages") {
+        dependsOn(gradle.includedBuild("ok-marketplace-be").task(":buildImages"))
+    }
 
     register("e2eTests") { ->
         dependsOn(
