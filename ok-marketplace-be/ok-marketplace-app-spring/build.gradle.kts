@@ -1,0 +1,115 @@
+import org.gradle.kotlin.dsl.named
+import ru.otus.otuskotlin.marketplace.plugin.DockerBuildTask
+
+plugins {
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependencies)
+    alias(libs.plugins.spring.kotlin)
+    alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.shadowJar)
+    id("build-jvm")
+    id("build-docker")
+}
+
+docker {
+    // JVM образ
+    images.register("Jvm") {
+        buildContext = project.layout.buildDirectory.dir("docker-jvm").get().toString()
+        dockerFile = "Dockerfile"
+        dependsOnTask = "shadowJar"
+        imageName = project.name
+        imageTag = "${project.version}"
+    }
+}
+
+dependencies {
+    implementation(libs.spring.actuator)
+    implementation(libs.spring.webflux)
+    implementation(libs.spring.webflux.ui)
+    implementation(libs.jackson.kotlin)
+    implementation(kotlin("reflect"))
+    implementation(kotlin("stdlib"))
+
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.reactor)
+    implementation(libs.coroutines.reactive)
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.serialization.json)
+
+    // Внутренние модели
+    implementation(project(":ok-marketplace-common"))
+    implementation(project(":ok-marketplace-app-common"))
+    implementation("ru.otus.otuskotlin.marketplace.libs:ok-marketplace-lib-logging-logback")
+
+    // v1 api
+    implementation(project(":ok-marketplace-api-v1-jackson"))
+    implementation(project(":ok-marketplace-api-v1-mappers"))
+
+    // v2 api
+    implementation(project(":ok-marketplace-api-v2-kmp"))
+
+    // biz
+    implementation(project(":ok-marketplace-biz"))
+
+    // tests
+    testImplementation(kotlin("test-junit5"))
+    testImplementation(libs.spring.test)
+    testImplementation(libs.mockito.kotlin)
+}
+
+tasks {
+    withType<ProcessResources> {
+        val files = listOf("spec-v1", "spec-v2").map {
+            rootProject.ext[it]
+        }
+        from(files) {
+            into("/static")
+            filter {
+                // Устанавливаем версию в сваггере
+                it.replace("\${VERSION_APP}", project.version.toString())
+            }
+
+        }
+    }
+}
+
+tasks {
+    withType<Test> {
+        useJUnitPlatform()
+    }
+
+    named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+        isZip64 = true
+        manifest {
+            // Optionally, set the main class for the shadowed JAR.
+            attributes["Main-Class"] = "ru.otus.otuskotlin.markeplace.app.spring.ApplicationKt"
+        }
+        dependencies {
+            exclude(dependency("org.graalvm.js:js:.*"))
+            exclude(dependency("org.graalvm.polyglot:js:.*"))
+        }
+        // Исключаем проблемные файлы из упаковки
+        exclude("**/*.pom")
+        exclude("**/*.module")
+    }
+}
+
+// Заколебался бороться со спринговым плагином,
+// Будем использовать наш кастомный
+afterEvaluate {
+    tasks {
+        named("dockerBuildJvm", DockerBuildTask::class) {
+            dependsOn(shadowJar)
+            group = "docker"
+            doFirst {
+                copy {
+                    from("Dockerfile.jvm") { rename { "Dockerfile" } }
+                    from(shadowJar.get().archiveFile.get())
+                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                    println("BUILD CONTEXT: ${buildContext.get()}")
+                    into(buildContext)
+                }
+            }
+        }
+    }
+}
