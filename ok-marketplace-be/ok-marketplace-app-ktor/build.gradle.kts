@@ -1,20 +1,31 @@
-import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
-import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+import org.gradle.kotlin.dsl.named
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
+import ru.otus.otuskotlin.marketplace.plugin.DockerBuildTask
 
 plugins {
     alias(libs.plugins.kotlinx.serialization)
     id("build-kmp")
-    alias(libs.plugins.ktor)
-    alias(libs.plugins.muschko.remote)
+    alias(libs.plugins.shadowJar)
+    id("build-docker")
 }
 
-ktor {
-    docker {
-        localImageName.set(project.name)
-        imageTag.set(project.version.toString())
-        jreVersion.set(JavaVersion.VERSION_21)
+docker {
+    // JVM образ
+    images.register("Jvm") {
+        buildContext = project.layout.buildDirectory.dir("docker-jvm").get().toString()
+        dockerFile = "Dockerfile"
+        dependsOnTask = "jvmJar"
+        imageName = "${project.name}-jvm"
+        imageTag = "${project.version}"
+    }
+
+    // Native образ для Linux x64
+    images.register("LinuxX64") {
+        buildContext = project.layout.buildDirectory.dir("docker-linuxx64").get().toString()
+        dockerFile = "Dockerfile"
+        dependsOnTask = "linkReleaseExecutableLinuxX64"
+        imageName = "${project.name}-x64"
+        imageTag = "${project.version}"
     }
 }
 
@@ -114,59 +125,59 @@ kotlin {
 }
 
 tasks {
-    /*shadowJar {
-        isZip64 = true
-    }*/
-
     // Если ошибка: "Entry application.yaml is a duplicate but no duplicate handling strategy has been set."
     // Возникает из-за наличия файлов как в common, так и в jvm платформе
     withType(ProcessResources::class) {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
-    val linkReleaseExecutableLinuxX64 by getting(KotlinNativeLink::class)
-    val nativeFileX64 = linkReleaseExecutableLinuxX64.binary.outputFile
-    val linuxX64ProcessResources by getting(ProcessResources::class)
 
-    val dockerDockerfileX64 by creating(Dockerfile::class) {
-        dependsOn(linkReleaseExecutableLinuxX64)
-        dependsOn(linuxX64ProcessResources)
-        group = "docker"
-        from(Dockerfile.From("ubuntu:22.04").withPlatform("linux/amd64"))
-        doFirst {
-            copy {
-                from(nativeFileX64)
-                from(linuxX64ProcessResources.destinationDir)
-                into("${this@creating.destDir.get()}")
+    named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+        isZip64 = true
+        manifest {
+            // Optionally, set the main class for the shadowed JAR.
+            attributes["Main-Class"] = "io.ktor.server.cio.EngineMain"
+        }
+        dependencies {
+            exclude(dependency("org.graalvm.js:js:.*"))
+            exclude(dependency("org.graalvm.polyglot:js:.*"))
+        }
+        // Исключаем проблемные файлы из упаковки
+        exclude("**/*.pom")
+        exclude("**/*.module")
+    }
+}
+
+afterEvaluate {
+    tasks {
+        named("dockerBuildJvm", DockerBuildTask::class) {
+            dependsOn(shadowJar)
+            group = "docker"
+            doFirst {
+                copy {
+                    from("Dockerfile.jvm") { rename { "Dockerfile" } }
+                    from(shadowJar.get().archiveFile.get())
+                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                    println("BUILD CONTEXT: ${buildContext.get()}")
+                    into(buildContext)
+                }
             }
         }
-        copyFile(nativeFileX64.name, "/app/")
-        copyFile("application.yaml", "/app/")
-        exposePort(8080)
-        workingDir("/app")
-        entryPoint("/app/${nativeFileX64.name}", "-config=./application.yaml")
-    }
-    val registryUser: String? = System.getenv("CONTAINER_REGISTRY_USER")
-    val registryPass: String? = System.getenv("CONTAINER_REGISTRY_PASS")
-    val registryHost: String? = System.getenv("CONTAINER_REGISTRY_HOST")
-    val registryPref: String? = System.getenv("CONTAINER_REGISTRY_PREF")
-    val imageName = registryPref?.let { "$it/${project.name}" } ?: project.name
 
-    val dockerBuildX64Image by creating(DockerBuildImage::class) {
-        group = "docker"
-        dependsOn(dockerDockerfileX64)
-        images.add("$imageName-x64:${rootProject.version}")
-        images.add("$imageName-x64:latest")
-        platform.set("linux/amd64")
-    }
-    val dockerPushX64Image by creating(DockerPushImage::class) {
-        group = "docker"
-        dependsOn(dockerBuildX64Image)
-        images.set(dockerBuildX64Image.images)
-        registryCredentials {
-            username.set(registryUser)
-            password.set(registryPass)
-            url.set("https://$registryHost/v1/")
+        named("dockerBuildLinuxX64", DockerBuildTask::class) {
+            dependsOn("linkReleaseExecutableLinuxX64")
+            dependsOn("linuxX64ProcessResources")
+            group = "docker"
+            doFirst {
+                copy {
+                    from("Dockerfile")
+                    from(getByName("linkReleaseExecutableLinuxX64").outputs)
+                    from(linuxX64ProcessResources.get().outputs)
+                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                    println("BUILD CONTEXT: ${buildContext.get()}")
+                    into(buildContext)
+                }
+            }
         }
     }
 }

@@ -1,0 +1,16 @@
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+RUN apk update && \
+    apk add --no-cache curl
+
+# Copy the built JAR
+COPY ./ok-marketplace-app-ktor-0.0.1-all.jar ./app.jar
+
+# Create logs directory
+RUN mkdir -p /app/logs
+
+EXPOSE 8080
+
+CMD ["java", "-jar", "app.jar"]

@@ -18,9 +18,6 @@ kermit = "2.0.3"
 ktor = "3.4.3"
 spring-boot = "3.4.0"
 
-# Docker
-muschko = "9.4.0"
-
 #Testing
 testcontainers = "2.0.4"
 
@@ -102,9 +99,3 @@ shadowJar = { id = "com.gradleup.shadow", version = "9.3.2" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependencies = { id = "io.spring.dependency-management", version = "1.1.7" }
 spring-kotlin = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
-
-# Ktor
-ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
-
-# Docker
-muschko-remote = { id = "com.bmuschko.docker-remote-api", version.ref = "muschko" }
