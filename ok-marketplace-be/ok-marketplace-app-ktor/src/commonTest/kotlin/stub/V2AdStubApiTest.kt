@@ -133,7 +133,7 @@ class V2AdStubApiTest {
         func: String,
         request: T,
         crossinline function: suspend (HttpResponse) -> Unit,
-    ): Unit = testApplication {
+    ) = testApplication {
         application { module(MkplAppSettings(corSettings = MkplCorSettings())) }
         val client = createClient {
             install(ContentNegotiation) {
