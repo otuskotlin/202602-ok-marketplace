@@ -3,6 +3,7 @@ package ru.otus.otuskotlin.marketplace.app.common
 import ru.otus.otuskotlin.marketplace.api.log1.mapper.toLog
 import ru.otus.otuskotlin.marketplace.common.MkplContext
 import ru.otus.otuskotlin.marketplace.common.helpers.asMkplError
+import ru.otus.otuskotlin.marketplace.common.models.MkplCommand
 import ru.otus.otuskotlin.marketplace.common.models.MkplState
 import kotlin.reflect.KClass
 import kotlin.time.Clock
@@ -40,6 +41,9 @@ suspend inline fun <T> IMkplAppSettings.controllerHelper(
         ctx.state = MkplState.FAILING
         ctx.errors.add(e.asMkplError())
         processor.exec(ctx)
+        if (ctx.command == MkplCommand.NONE) {
+            ctx.command = MkplCommand.READ
+        }
         ctx.toResponse()
     }
 }
