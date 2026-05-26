@@ -11,6 +11,7 @@ import ru.otus.otuskotlin.marketplace.common.MkplCorSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.time.Duration.Companion.seconds
 
 class V1WebsocketStubTest {
 
@@ -131,12 +132,12 @@ class V1WebsocketStubTest {
         }
 
         client.webSocket("/v1/ws") {
-            withTimeout(3000) {
+            withTimeout(3.seconds) {
                 val response = receiveDeserialized<IResponse>() as T
                 assertIs<AdInitResponse>(response)
             }
             sendSerialized(request)
-            withTimeout(3000) {
+            withTimeout(3.seconds) {
                 val response = receiveDeserialized<IResponse>() as T
                 assertBlock(response)
             }

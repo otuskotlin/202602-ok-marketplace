@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import ru.otus.otuskotlin.marketplace.api.v1.apiV1Mapper
 import ru.otus.otuskotlin.marketplace.api.v1.models.IRequest
@@ -34,8 +34,8 @@ suspend fun WebSocketSession.wsHandlerV1(appSettings: MkplAppSettings) = with(Kt
     )
 
     // Handle flow
-    incoming.receiveAsFlow().mapNotNull {
-        val frame = it as? Frame.Text ?: return@mapNotNull
+    incoming.receiveAsFlow().map {
+        val frame = it as? Frame.Text ?: return@map
         // Handle without flow destruction
         try {
             appSettings.controllerHelper(

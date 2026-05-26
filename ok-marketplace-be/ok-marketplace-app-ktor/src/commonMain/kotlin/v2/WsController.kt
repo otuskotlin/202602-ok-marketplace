@@ -3,7 +3,7 @@ package ru.otus.otuskotlin.marketplace.app.ktor.v2
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.receiveAsFlow
 import ru.otus.otuskotlin.marketplace.api.v2.apiV2RequestDeserialize
@@ -37,8 +37,8 @@ suspend fun WebSocketSession.wsHandlerV2(appSettings: MkplAppSettings) = with(Kt
 
     // Handle flow
     incoming.receiveAsFlow()
-        .mapNotNull { it ->
-            val frame = it as? Frame.Text ?: return@mapNotNull
+        .map { it ->
+            val frame: Frame.Text = it as? Frame.Text ?: return@map
             // Handle without flow destruction
             try {
                 appSettings.controllerHelper(
