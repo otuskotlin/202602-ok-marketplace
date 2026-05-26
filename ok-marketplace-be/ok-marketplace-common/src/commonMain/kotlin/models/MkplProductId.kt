@@ -3,7 +3,7 @@ package ru.otus.otuskotlin.marketplace.common.models
 import kotlin.jvm.JvmInline
 
 @JvmInline
-value class MkplProductId(private val id: String) {
+value class MkplProductId(val id: String) {
     fun asString() = id
 
     companion object {
