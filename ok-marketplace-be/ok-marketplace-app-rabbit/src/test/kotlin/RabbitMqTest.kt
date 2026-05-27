@@ -26,6 +26,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import ru.otus.otuskotlin.marketplace.api.v2.models.AdCreateObject as AdCreateObjectV2
 import ru.otus.otuskotlin.marketplace.api.v2.models.AdCreateRequest as AdCreateRequestV2
 import ru.otus.otuskotlin.marketplace.api.v2.models.AdCreateResponse as AdCreateResponseV2
@@ -124,9 +126,9 @@ internal class RabbitMqTest {
                 channel.basicPublish(exchange, keyIn, null, apiV1Mapper.writeValueAsBytes(boltCreateV1))
 
                 runBlocking {
-                    withTimeoutOrNull(1000L) {
+                    withTimeoutOrNull(1.seconds) {
                         while (responseJson.isBlank()) {
-                            delay(10)
+                            delay(10.milliseconds)
                         }
                     }
                 }
@@ -165,9 +167,9 @@ internal class RabbitMqTest {
                 channel.basicPublish(exchange, keyIn, null, apiV2RequestSerialize(boltCreateV2).toByteArray())
 
                 runBlocking {
-                    withTimeoutOrNull(1000L) {
+                    withTimeoutOrNull(1.seconds) {
                         while (responseJson.isBlank()) {
-                            delay(10)
+                            delay(10.milliseconds)
                         }
                     }
                 }
