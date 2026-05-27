@@ -2,35 +2,33 @@
 
 services:
   app-rabbit:
-    image: ok-marketplace-app-rabbit:latest
+    image: ok-marketplace-app-rabbit:0.0.1
     depends_on:
       rabbit:
         condition: service_healthy
     environment:
       RABBIT_HOST: rabbit
+      RABBIT_PORT: 5672
+      RABBIT_USER: guest
+      RABBIT_PASS: guest
     networks:
       - app-tier
 
   rabbit:
-    extends:
-      file: ../build/dcompose/rabbit-base.yml
-      service: rabbit-base
-
-#  rabbit:
-#    image: rabbitmq:3.11.14-management
-#    ports:
-#      - "5672:5672"
-#      - "15672:15672"
-#    environment:
-#      RABBITMQ_DEFAULT_USER: guest
-#      RABBITMQ_DEFAULT_PASS: guest
-#    healthcheck:
-#      test: rabbitmq-diagnostics -q ping
-#      interval: 10s
-#      timeout: 10s
-#      retries: 3
-#    networks:
-#      - app-tier
+    image: rabbitmq:3.11.14-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-tier
 
 networks:
   app-tier:

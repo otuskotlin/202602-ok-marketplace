@@ -6,7 +6,7 @@ RUN apk update && \
     apk add --no-cache curl
 
 # Copy the built JAR
-COPY ./ok-marketplace-app-rabbitmq-0.0.1-all.jar ./app.jar
+COPY ./ok-marketplace-app-rabbit-0.0.1-all.jar ./app.jar
 
 # Create logs directory
 RUN mkdir -p /app/logs

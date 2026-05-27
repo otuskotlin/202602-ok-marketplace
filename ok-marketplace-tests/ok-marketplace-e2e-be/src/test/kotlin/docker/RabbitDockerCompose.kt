@@ -3,7 +3,7 @@ package ru.otus.otuskotlin.marketplace.e2e.be.docker
 import ru.otus.otuskotlin.marketplace.e2e.be.base.AbstractDockerCompose
 
 object RabbitDockerCompose : AbstractDockerCompose(
-    "rabbit_1", 5672, "docker-compose-rabbit.yml"
+    "rabbit", 5672, "docker-compose-rabbit.yml"
 ) {
     override val user: String
         get() = "guest"
