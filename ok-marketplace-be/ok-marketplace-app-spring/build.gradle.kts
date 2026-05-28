@@ -73,6 +73,16 @@ tasks {
     }
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlinx" && 
+            (requested.name == "kotlinx-serialization-core-jvm" || requested.name == "kotlinx-serialization-json-jvm")
+        ) {
+            useVersion(libs.versions.kotlinx.serialization.get())
+        }
+    }
+}
+
 tasks {
     withType<Test> {
         useJUnitPlatform()

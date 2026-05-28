@@ -11,7 +11,7 @@ data class MkplAd(
     var lock: MkplAdLock = MkplAdLock.NONE,
     val permissionsClient: MutableSet<MkplAdPermissionClient> = mutableSetOf(),
 ) {
-    fun isEmpty() = this == NONE
+    fun isEmpty() = this == MkplAd.NONE
 
     companion object {
         private val NONE = MkplAd()
