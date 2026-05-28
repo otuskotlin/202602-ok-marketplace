@@ -5,6 +5,7 @@ import kotlinx.coroutines.*
 import ru.otus.otuskotlin.marketplace.app.rabbit.config.RabbitConfig
 import ru.otus.otuskotlin.marketplace.app.rabbit.config.RabbitExchangeConfiguration
 import ru.otus.otuskotlin.marketplace.logging.common.MpLoggerProvider
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -20,8 +21,6 @@ abstract class RabbitProcessorBase @OptIn(ExperimentalCoroutinesApi::class) cons
     private val dispatcher: CoroutineContext = Dispatchers.IO.limitedParallelism(1) + Job(),
 ) : IRabbitMqController {
     private val logger = loggerProvider.logger(this::class)
-    private var conn: Connection? = null
-    private var chan: Channel? = null
     override suspend fun process() = withContext(dispatcher) {
         ConnectionFactory().apply {
             host = rabbitConfig.host
@@ -30,16 +29,15 @@ abstract class RabbitProcessorBase @OptIn(ExperimentalCoroutinesApi::class) cons
             password = rabbitConfig.password
         }.newConnection().use { connection ->
             logger.debug("Creating new connection [${exchangeConfig.consumerTag}]")
-            conn = connection
             connection.createChannel().use { channel ->
                 logger.debug("Creating new channel [${exchangeConfig.consumerTag}]")
-                chan = channel
                 val deliveryCallback = channel.getDeliveryCallback()
                 val cancelCallback = getCancelCallback()
                 channel.describeAndListen(deliveryCallback, cancelCallback)
             }
         }
     }
+    private val finishFlag = AtomicBoolean(false)
 
     /**
      * Обработка поступившего сообщения в deliverCallback
@@ -57,8 +55,6 @@ abstract class RabbitProcessorBase @OptIn(ExperimentalCoroutinesApi::class) cons
     private fun Channel.getDeliveryCallback(): DeliverCallback = DeliverCallback { _, delivery: Delivery ->
         runBlocking {
             kotlin.runCatching {
-//                val routingKey: String = delivery.envelope.routingKey
-//                val contentType: String = delivery.properties.contentType
                 val deliveryTag: Long = delivery.envelope.deliveryTag
                 processMessage(delivery)
                 // Ручное подтверждение завершения обработки сообщения
@@ -97,7 +93,7 @@ abstract class RabbitProcessorBase @OptIn(ExperimentalCoroutinesApi::class) cons
             )
 
             // Блокируем текущий поток для обработки фоновых процессов
-            while (isOpen) {
+            while (isOpen || finishFlag.get()) {
                 // Предотвращаем завал при прерывании delay
                 runCatching {
                     delay(100.milliseconds)
@@ -108,15 +104,7 @@ abstract class RabbitProcessorBase @OptIn(ExperimentalCoroutinesApi::class) cons
     }
 
     override fun close() {
+        finishFlag.set(true)
         logger.debug("CLOSE is requested [${exchangeConfig.consumerTag}]")
-        chan?.takeIf { it.isOpen }?.run {
-            basicCancel(exchangeConfig.consumerTag)
-            close()
-            logger.debug("Close channel [${exchangeConfig.consumerTag}]")
-        }
-        conn?.takeIf { it.isOpen }?.run {
-            close()
-            logger.debug("Close Rabbit connection [${exchangeConfig.consumerTag}]")
-        }
     }
 }
