@@ -53,5 +53,7 @@ tasks {
 
 
         dependsOn(project("ok-marketplace-app-spring").tasks.getByName("dockerBuildJvm"))
+        dependsOn(project("ok-marketplace-app-ktor").tasks.getByName("dockerBuildJvm"))
+        dependsOn(project("ok-marketplace-app-ktor").tasks.getByName("dockerBuildLinuxX64"))
     }
 }
