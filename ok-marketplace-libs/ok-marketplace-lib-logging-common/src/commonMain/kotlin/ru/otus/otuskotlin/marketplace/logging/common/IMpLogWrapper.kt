@@ -4,7 +4,6 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
-@OptIn(ExperimentalStdlibApi::class)
 @Suppress("unused")
 interface IMpLogWrapper: AutoCloseable {
     val loggerId: String
@@ -24,21 +23,21 @@ interface IMpLogWrapper: AutoCloseable {
         e: Throwable? = null,
         data: Any? = null,
         objs: Map<String, Any>? = null,
-    ) = log(msg, LogLevel.ERROR, marker, e, data, objs)
+    ) = this.log(msg, LogLevel.ERROR, marker, e, data, objs)
 
     fun info(
         msg: String = "",
         marker: String = "DEV",
         data: Any? = null,
         objs: Map<String, Any>? = null,
-    ) = log(msg, LogLevel.INFO, marker, null, data, objs)
+    ) = this.log(msg, LogLevel.INFO, marker, null, data, objs)
 
     fun debug(
         msg: String = "",
         marker: String = "DEV",
         data: Any? = null,
         objs: Map<String, Any>? = null,
-    ) = log(msg, LogLevel.DEBUG, marker, null, data, objs)
+    ) = this.log(msg, LogLevel.DEBUG, marker, null, data, objs)
 
     /**
      * Функция обертка для выполнения прикладного кода с логированием перед выполнением и после
@@ -49,17 +48,17 @@ interface IMpLogWrapper: AutoCloseable {
         level: LogLevel = LogLevel.INFO,
         block: suspend () -> T,
     ): T = try {
-        log("Started $loggerId $id", level)
+        this.log("Started $loggerId $id", level)
         val (res, diffTime) = measureTimedValue { block() }
 
-        log(
+        this.log(
             msg = "Finished $loggerId $id",
             level = level,
             objs = mapOf("metricHandleTime" to diffTime.toIsoString())
         )
         res
     } catch (e: Throwable) {
-        log(
+        this.log(
             msg = "Failed $loggerId $id",
             level = LogLevel.ERROR,
             e = e
@@ -78,7 +77,7 @@ interface IMpLogWrapper: AutoCloseable {
         val result = block()
         result
     } catch (e: Throwable) {
-        log(
+        this.log(
             msg = "Failed $loggerId $id",
             level = LogLevel.ERROR,
             e = e

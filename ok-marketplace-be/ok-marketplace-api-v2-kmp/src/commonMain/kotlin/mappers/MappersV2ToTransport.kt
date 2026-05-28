@@ -12,6 +12,8 @@ fun MkplContext.toTransportAd(): IResponse = when (val cmd = command) {
     MkplCommand.DELETE -> toTransportDelete()
     MkplCommand.SEARCH -> toTransportSearch()
     MkplCommand.OFFERS -> toTransportOffers()
+    MkplCommand.INIT -> toTransportInit()
+    MkplCommand.FINISH -> throw UnknownMkplCommand(cmd)
     MkplCommand.NONE -> throw UnknownMkplCommand(cmd)
 }
 
@@ -48,7 +50,13 @@ fun MkplContext.toTransportSearch() = AdSearchResponse(
 fun MkplContext.toTransportOffers() = AdOffersResponse(
     result = state.toResult(),
     errors = errors.toTransportErrors(),
-    ads = adsResponse.toTransportAd()
+    ad = adResponse.toTransportAd(),
+    ads = adsResponse.toTransportAd(),
+)
+
+fun MkplContext.toTransportInit() = AdInitResponse(
+    result = state.toResult(),
+    errors = errors.toTransportErrors(),
 )
 
 fun List<MkplAd>.toTransportAd(): List<AdResponseObject>? = this

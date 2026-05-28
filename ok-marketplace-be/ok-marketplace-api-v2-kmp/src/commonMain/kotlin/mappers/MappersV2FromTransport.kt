@@ -6,7 +6,7 @@ import ru.otus.otuskotlin.marketplace.common.models.*
 import ru.otus.otuskotlin.marketplace.common.models.MkplWorkMode
 import ru.otus.otuskotlin.marketplace.common.stubs.MkplStubs
 
-fun MkplContext.fromTransport(request: IRequest) = when (request) {
+fun MkplContext.fromTransport(request: IRequest): Unit = when (request) {
     is AdCreateRequest -> fromTransport(request)
     is AdReadRequest -> fromTransport(request)
     is AdUpdateRequest -> fromTransport(request)
