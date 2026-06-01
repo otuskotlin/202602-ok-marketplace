@@ -1,5 +1,7 @@
 package ru.otus.otuskotlin.marketplace.e2e.be.base.client
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -9,16 +11,14 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import ru.otus.otuskotlin.marketplace.e2e.be.base.DockerCompose
 import java.time.Duration
-import java.util.UUID
+import java.util.*
 
 /**
  * Отправка запросов в очереди kafka
  */
 class KafkaClient(dockerCompose: DockerCompose) : Client {
-    private val host by lazy {
-        val url = dockerCompose.inputUrl
-        "${url.host}:${url.port}"
-    }
+    private val host = "localhost:9092"
+
     private val producer by lazy {
         KafkaProducer<String, String>(
             mapOf(
@@ -37,8 +37,8 @@ class KafkaClient(dockerCompose: DockerCompose) : Client {
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java
             )
-        ).also {
-            it.subscribe(versions.map { "marketplace-out-$it" })
+        ).also { cons ->
+            cons.subscribe(versions.map { "marketplace-ad-$it-out" })
         }
     }
     private var counter = 0
@@ -50,9 +50,11 @@ class KafkaClient(dockerCompose: DockerCompose) : Client {
         }
 
         counter += 1
-        producer.send(ProducerRecord("marketplace-in-$version", "test-$counter", request)).get()
+        withContext(Dispatchers.IO) {
+            producer.send(ProducerRecord("marketplace-ad-$version-in", "test-$counter", request)).get()
+        }
 
-        val read = consumer.poll(Duration.ofSeconds(20))
+        val read = consumer.poll(Duration.ofSeconds(10))
         return read.firstOrNull()?.value() ?: ""
     }
 }

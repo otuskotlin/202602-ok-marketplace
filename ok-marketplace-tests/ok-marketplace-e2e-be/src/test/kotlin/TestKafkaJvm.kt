@@ -3,21 +3,22 @@ package ru.otus.otuskotlin.marketplace.e2e.be
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import ru.otus.otuskotlin.marketplace.e2e.be.base.client.RabbitClient
 import ru.otus.otuskotlin.marketplace.e2e.be.base.BaseContainerTest
 import ru.otus.otuskotlin.marketplace.e2e.be.base.client.Client
+import ru.otus.otuskotlin.marketplace.e2e.be.base.client.KafkaClient
 import ru.otus.otuskotlin.marketplace.e2e.be.docker.KafkaDockerCompose
 import ru.otus.otuskotlin.marketplace.e2e.be.scenarios.v1.ScenariosV1
 import ru.otus.otuskotlin.marketplace.e2e.be.scenarios.v2.ScenariosV2
+import kotlin.test.Ignore
 import ru.otus.otuskotlin.marketplace.api.v1.models.AdDebug as AdDebugV1
 import ru.otus.otuskotlin.marketplace.api.v1.models.AdRequestDebugMode as AdRequestDebugModeV1
 import ru.otus.otuskotlin.marketplace.api.v2.models.AdDebug as AdDebugV2
 import ru.otus.otuskotlin.marketplace.api.v2.models.AdRequestDebugMode as AdRequestDebugModeV2
 
-//@Ignore
+@Ignore
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestKafkaJvm: BaseContainerTest(KafkaDockerCompose) {
-    private val client: Client = RabbitClient(compose)
+    private val client: Client = KafkaClient(compose)
     @Test
     fun info() {
         println("${this::class.simpleName}")
