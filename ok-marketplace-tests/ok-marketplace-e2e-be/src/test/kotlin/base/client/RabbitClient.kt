@@ -1,4 +1,4 @@
-package ru.otus.otuskotlin.marketplace.blackbox.fixture.client
+package ru.otus.otuskotlin.marketplace.e2e.be.base.client
 
 import com.rabbitmq.client.CancelCallback
 import com.rabbitmq.client.ConnectionFactory
@@ -6,7 +6,6 @@ import com.rabbitmq.client.DeliverCallback
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import ru.otus.otuskotlin.marketplace.e2e.be.base.DockerCompose
-import ru.otus.otuskotlin.marketplace.e2e.be.base.client.Client
 
 /**
  * Клиент, работающий через rabbit-mq
