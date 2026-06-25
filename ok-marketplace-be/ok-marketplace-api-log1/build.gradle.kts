@@ -6,14 +6,47 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
 }
 
+// 1. Настраиваем конфигурацию для получения файла из другого проекта
+val specsFromLib by configurations.creating {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
+dependencies {
+    specsFromLib("ru.otus.otuskotlin.marketplace:ok-marketplace-specs:0.1.0:spec@zip")
+}
+
+val specDir = layout.buildDirectory.dir("specs")
+
+tasks {
+    val extractLibSpecs by registering(Copy::class) {
+        dependsOn(specsFromLib)
+        // Распаковываем ZIP-файл (он будет единственным в этой конфигурации)
+        from(specsFromLib.elements.map { it.map { file -> zipTree(file) } })
+        into(specDir)
+    }
+
+// 3. Привязываем генерацию к распаковке
+    named("openApiGenerate") {
+        dependsOn(extractLibSpecs)
+    }
+
+    val openApiGenerateTask: GenerateTask = getByName("openApiGenerate", GenerateTask::class) {
+        outputDir.set(layout.buildDirectory.file("generate-resources").get().toString())
+        finalizedBy("compileCommonMainKotlinMetadata")
+    }
+    filter { it.name.startsWith("compile") }.forEach {
+        it.dependsOn(openApiGenerateTask)
+    }
+}
 crowdprojGenerate {
     packageName.set("${project.group}.api.log1")
-    inputSpec.set(rootProject.ext["spec-log1"] as String)
+    inputSpec.set(specDir.map { it.file("specs-ad-log1.yaml").asFile.absolutePath })
 }
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             kotlin.srcDirs(layout.buildDirectory.dir("generate-resources/src/commonMain/kotlin"))
             dependencies {
                 implementation(kotlin("stdlib-common"))
@@ -24,35 +57,35 @@ kotlin {
                 implementation(project(":ok-marketplace-common"))
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }
         }
-        val jvmMain by getting {
+        jvmMain {
             dependencies {
                 implementation(kotlin("stdlib-jdk8"))
             }
         }
-        val jvmTest by getting {
+        jvmTest {
             dependencies {
                 implementation(kotlin("test-junit"))
             }
         }
-
-        all {
-            languageSettings.optIn("kotlin.RequiresOptIn")
-        }
+//
+//        all {
+//            languageSettings.optIn("kotlin.RequiresOptIn")
+//        }
     }
 }
 
-tasks {
-    val openApiGenerateTask: GenerateTask = getByName("openApiGenerate", GenerateTask::class) {
-        outputDir.set(layout.buildDirectory.file("generate-resources").get().toString())
-        finalizedBy("compileCommonMainKotlinMetadata")
-    }
-    filter { it.name.startsWith("compile") }.forEach {
-        it.dependsOn(openApiGenerateTask)
-    }
-}
+//tasks {
+//    val openApiGenerateTask: GenerateTask = getByName("openApiGenerate", GenerateTask::class) {
+//        outputDir.set(layout.buildDirectory.file("generate-resources").get().toString())
+//        finalizedBy("compileCommonMainKotlinMetadata")
+//    }
+//    filter { it.name.startsWith("compile") }.forEach {
+//        it.dependsOn(openApiGenerateTask)
+//    }
+//}
