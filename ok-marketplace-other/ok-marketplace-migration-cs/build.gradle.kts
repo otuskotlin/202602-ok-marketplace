@@ -1,13 +1,16 @@
 import org.testcontainers.containers.ComposeContainer
+import ru.otus.otuskotlin.marketplace.plugin.DockerBuildTask
 
 plugins {
     id("build-docker")
 }
 
 docker {
-    imageName = project.name
-    imageTag = "${project.version}"
-    dockerFile = "src/main/docker/Dockerfile"
+    images.register("Cs") {
+        buildContext = project.layout.buildDirectory.dir("docker").get().toString()
+        imageName = project.name
+        imageTag = "${project.version}"
+    }
 }
 
 buildscript {
@@ -17,7 +20,7 @@ buildscript {
 
     dependencies {
         // Testcontainers core + Docker Compose модуль
-        // classpath("org.testcontainers:testcontainers:1.20.6")
+        // classpath("org.testcontainers:testcontainers:2.**")
         classpath(libs.testcontainers.core)
     }
 }
@@ -30,11 +33,11 @@ val csContainer: ComposeContainer by lazy {
 }
 
 tasks {
-    val buildImages by creating {
-        dependsOn("build-docker")
+    val buildImages by registering {
+        dependsOn("dockerBuildCs")
     }
 
-    val cassandraDn by creating {
+    val cassandraDn by registering {
         group = "db"
         doFirst {
             println("Stopping Cassandra...")
@@ -42,7 +45,7 @@ tasks {
             println("Cassandra stopped")
         }
     }
-    val cassandraUp by creating {
+    val cassandraUp by registering {
         group = "db"
         doFirst {
             println("Starting Cassandra...")
@@ -52,4 +55,18 @@ tasks {
         finalizedBy(cassandraDn)
     }
 
+}
+
+afterEvaluate {
+    tasks {
+        named("dockerBuildCs", DockerBuildTask::class) {
+            doFirst {
+                copy {
+                    from("src/main/liquibase") //{ into("${buildContext.get()}/liquibase") }
+                    from("src/main/docker/Dockerfile")
+                    into(buildContext)
+                }
+            }
+        }
+    }
 }

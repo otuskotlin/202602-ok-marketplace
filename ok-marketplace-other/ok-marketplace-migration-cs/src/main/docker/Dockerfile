@@ -1,7 +1,7 @@
 FROM liquibase/liquibase:4.31.1
 
 # Копирование конфигурации и миграций
-COPY ./src/main/liquibase/* /liquibase/
+COPY . /liquibase/
 
 # Установка правильного JDBC-драйвера
 ENV CASSANDRA_JDBC_VERSION=4.14.0

@@ -1,13 +1,17 @@
+import org.gradle.kotlin.dsl.named
 import org.testcontainers.containers.ComposeContainer
+import ru.otus.otuskotlin.marketplace.plugin.DockerBuildTask
 
 plugins {
     id("build-docker")
 }
 
 docker {
-    imageName = project.name
-    imageTag = "${project.version}"
-    dockerFile = "src/main/docker/Dockerfile"
+    images.register("Pg") {
+        buildContext = project.layout.buildDirectory.dir("docker").get().toString()
+        imageName = project.name
+        imageTag = "${project.version}"
+    }
 }
 
 buildscript {
@@ -33,11 +37,11 @@ val pgContainer: ComposeContainer by lazy {
 }
 
 tasks {
-    val buildImages by creating {
+    val buildImages by registering {
         dependsOn("build-docker")
     }
 
-    val pgDn by creating {
+    val pgDn by registering {
         group = "db"
         doFirst {
             println("Stopping PostgreSQL...")
@@ -45,7 +49,7 @@ tasks {
             println("PostgreSQL stopped")
         }
     }
-    val pgUp by creating {
+    val pgUp by registering {
         group = "db"
         doFirst {
             println("Starting PostgreSQL...")
@@ -53,5 +57,19 @@ tasks {
             println("PostgreSQL started at port: ${pgContainer.getServicePort("psql", 5432)}")
         }
         finalizedBy(pgDn)
+    }
+}
+
+afterEvaluate {
+    tasks {
+        named("dockerBuildPg", DockerBuildTask::class) {
+            doFirst {
+                copy {
+                    from("src/main/liquibase") //{ into("${buildContext.get()}/liquibase") }
+                    from("src/main/docker/Dockerfile")
+                    into(buildContext)
+                }
+            }
+        }
     }
 }
