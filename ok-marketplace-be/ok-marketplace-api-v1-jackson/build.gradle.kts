@@ -7,7 +7,7 @@ plugins {
 
 sourceSets {
     main {
-        java.srcDir(layout.buildDirectory.dir("generate-resources/main/src/main/kotlin"))
+        java.srcDir(layout.buildDirectory.dir("generate-resources/src/main/kotlin"))
     }
 }
 
@@ -75,12 +75,8 @@ tasks {
         into(specDir)
     }
 
-// 3. Привязываем генерацию к распаковке
-    named("openApiGenerate") {
-        dependsOn(extractLibSpecs)
-    }
-
     val openApiGenerateTask: GenerateTask = getByName("openApiGenerate", GenerateTask::class) {
+        dependsOn(extractLibSpecs)
         outputDir.set(layout.buildDirectory.file("generate-resources").get().toString())
     }
     filter { it.name.startsWith("compile") }.forEach {
