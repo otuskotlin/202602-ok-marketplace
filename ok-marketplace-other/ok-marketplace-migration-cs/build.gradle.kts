@@ -37,7 +37,7 @@ tasks {
         dependsOn("dockerBuildCs")
     }
 
-    val cassandraDn by registering {
+    val csDn by registering {
         group = "db"
         doFirst {
             println("Stopping Cassandra...")
@@ -45,14 +45,14 @@ tasks {
             println("Cassandra stopped")
         }
     }
-    val cassandraUp by registering {
+    val csUp by registering {
         group = "db"
         doFirst {
             println("Starting Cassandra...")
             csContainer.start()
             println("Cassandra started at port: ${csContainer.getServicePort("cassandra", 9042)}")
         }
-        finalizedBy(cassandraDn)
+        finalizedBy(csDn)
     }
 
 }

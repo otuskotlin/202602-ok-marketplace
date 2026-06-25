@@ -38,7 +38,7 @@ val pgContainer: ComposeContainer by lazy {
 
 tasks {
     val buildImages by registering {
-        dependsOn("build-docker")
+        dependsOn("dockerBuildPg")
     }
 
     val pgDn by registering {
