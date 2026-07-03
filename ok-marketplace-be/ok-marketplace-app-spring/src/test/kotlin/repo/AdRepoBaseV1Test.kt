@@ -25,7 +25,6 @@ internal abstract class AdRepoBaseV1Test {
         ),
         prepareCtx(MkplAdStub.prepareResult {
             id = MkplAdId(uuidNew)
-            ownerId = MkplUserId.NONE
             lock = MkplAdLock(uuidNew)
         })
             .toTransportCreate()
