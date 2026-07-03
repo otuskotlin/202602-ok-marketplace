@@ -12,7 +12,6 @@ import ru.otus.otuskotlin.marketplace.e2e.be.docker.KtorLinuxPGDockerCompose
 import ru.otus.otuskotlin.marketplace.e2e.be.scenarios.v2.ScenariosV2
 import kotlin.test.Ignore
 
-@Ignore
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestPgX64: BaseContainerTest(KtorLinuxPGDockerCompose) {
     private val client: Client = RestClient(compose)

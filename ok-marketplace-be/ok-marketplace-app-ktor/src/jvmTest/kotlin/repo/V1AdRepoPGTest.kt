@@ -7,9 +7,7 @@ import ru.otus.otuskotlin.marketplace.common.MkplCorSettings
 import ru.otus.otuskotlin.marketplace.common.repo.IRepoAd
 import ru.otus.otuskotlin.marketplace.repo.pgsqlx4k.RepoAdSql
 import kotlin.test.BeforeTest
-import kotlin.test.Ignore
 
-@Ignore
 open class V1AdRepoPGTest : V1AdRepoBaseTest() {
     override val workMode = ru.otus.otuskotlin.marketplace.api.v1.models.AdRequestDebugMode.TEST
     private fun mkAppSettings(repo: IRepoAd) = MkplAppSettings(
