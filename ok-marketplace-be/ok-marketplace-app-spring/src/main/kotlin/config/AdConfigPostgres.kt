@@ -1,7 +1,7 @@
 package ru.otus.otuskotlin.markeplace.app.spring.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import ru.otus.otuskotlin.marketplace.backend.repo.postgresql.SqlProperties
+import ru.otus.otuskotlin.marketplace.repo.pgsqlx4k.SqlProperties
 
 // Так не работает
 //@ConfigurationProperties(prefix = "markeplace.repository.psql")

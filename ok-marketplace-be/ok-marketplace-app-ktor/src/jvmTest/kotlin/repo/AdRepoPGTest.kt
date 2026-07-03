@@ -9,10 +9,10 @@ import org.testcontainers.containers.ComposeContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import repo.V1AdRepoPGTest
 import repo.V2AdRepoPGTest
-import ru.otus.otuskotlin.marketplace.backend.repo.postgresql.RepoAdSql
-import ru.otus.otuskotlin.marketplace.backend.repo.postgresql.SqlProperties
 import ru.otus.otuskotlin.marketplace.common.models.MkplAd
 import ru.otus.otuskotlin.marketplace.repo.common.AdRepoInitialized
+import ru.otus.otuskotlin.marketplace.repo.pgsqlx4k.RepoAdSql
+import ru.otus.otuskotlin.marketplace.repo.pgsqlx4k.SqlProperties
 import java.io.File
 import java.time.Duration
 import kotlin.test.Ignore

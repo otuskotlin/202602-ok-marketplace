@@ -3,9 +3,9 @@ package repo
 import ru.otus.otuskotlin.marketplace.app.ktor.MkplAppSettings
 import ru.otus.otuskotlin.marketplace.app.ktor.repo.AdRepoPGTest
 import ru.otus.otuskotlin.marketplace.app.ktor.repo.V1AdRepoBaseTest
-import ru.otus.otuskotlin.marketplace.backend.repo.postgresql.RepoAdSql
 import ru.otus.otuskotlin.marketplace.common.MkplCorSettings
 import ru.otus.otuskotlin.marketplace.common.repo.IRepoAd
+import ru.otus.otuskotlin.marketplace.repo.pgsqlx4k.RepoAdSql
 import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 

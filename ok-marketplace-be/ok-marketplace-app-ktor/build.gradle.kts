@@ -1,5 +1,4 @@
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
 import ru.otus.otuskotlin.marketplace.plugin.DockerBuildTask
 
 plugins {
@@ -114,7 +113,7 @@ kotlin {
 
                 implementation("ru.otus.otuskotlin.marketplace.libs:ok-marketplace-lib-logging-logback")
 
-                implementation(projects.okMarketplaceRepoPgjvm)
+                implementation(projects.okMarketplaceRepoPgsqlx4k)
                 implementation(libs.testcontainers.postgres)
             }
         }

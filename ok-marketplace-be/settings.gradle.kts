@@ -46,6 +46,7 @@ include(":ok-marketplace-repo-inmemory")
 include(":ok-marketplace-repo-stubs")
 include(":ok-marketplace-repo-tests")
 //include(":ok-marketplace-repo-postgres")
-include(":ok-marketplace-repo-pgjvm")
+//include(":ok-marketplace-repo-pgjvm")
+include(":ok-marketplace-repo-pgsqlx4k")
 //include(":ok-marketplace-repo-pgntv")
 

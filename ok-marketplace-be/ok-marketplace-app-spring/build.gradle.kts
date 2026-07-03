@@ -54,7 +54,7 @@ dependencies {
     // DB
     implementation(projects.okMarketplaceRepoStubs)
     implementation(projects.okMarketplaceRepoInmemory)
-    implementation(projects.okMarketplaceRepoPgjvm)
+    implementation(projects.okMarketplaceRepoPgsqlx4k)
     testImplementation(projects.okMarketplaceRepoCommon)
     testImplementation(projects.okMarketplaceStubs)
 

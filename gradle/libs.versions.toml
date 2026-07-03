@@ -21,6 +21,7 @@ spring-boot = "4.0.5"
 
 liquibase = "4.27.0"
 exposed = "0.50.0"
+sqlx4k = "1.9.1"
 
 #Testing
 testcontainers = "2.0.4"
@@ -94,6 +95,8 @@ db-hikari = "com.zaxxer:HikariCP:5.1.0"
 db-exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 db-exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed" }
 db-exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+sqlx4k-core = { module = "io.github.smyrgeorge:sqlx4k", version.ref = "sqlx4k" }
+sqlx4k-postgres = { module = "io.github.smyrgeorge:sqlx4k-postgres", version.ref = "sqlx4k" }
 
 # Testing
 kotest-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
