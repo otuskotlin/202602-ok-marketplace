@@ -34,7 +34,6 @@ class AdRepoPGTest {
                 ?: throw Exception("No resource found")
             val file = File(res.toURI())
             //  val logConsumer = Slf4jLogConsumer(LOGGER)
-            @Suppress("Since15")
             ComposeContainer(
                 file,
             )

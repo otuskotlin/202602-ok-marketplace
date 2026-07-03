@@ -8,7 +8,7 @@ data class SqlProperties(
     val database: String = "marketplace_ads",
     val schema: String = "public",
     val table: String = "ads",
-    val maxConnections: Int = 10,
+    val maxConnections: Int = 2,
 ) {
     val url: String
         get() = "postgresql://$host:$port/$database"

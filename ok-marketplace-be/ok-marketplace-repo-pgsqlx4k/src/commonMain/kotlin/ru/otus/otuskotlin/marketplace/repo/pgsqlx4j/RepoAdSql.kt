@@ -8,49 +8,64 @@ import kotlinx.coroutines.runBlocking
 import ru.otus.otuskotlin.marketplace.common.helpers.errorSystem
 import ru.otus.otuskotlin.marketplace.common.models.*
 import ru.otus.otuskotlin.marketplace.common.repo.*
-import ru.otus.otuskotlin.marketplace.common.repo.exceptions.RepoEmptyLockException
 import ru.otus.otuskotlin.marketplace.repo.common.IRepoAdInitializable
 
 class RepoAdSql(
-    properties: SqlProperties,
+    properties: SqlProperties = SqlProperties(),
     private val randomUuid: () -> String = { uuid4().toString() },
 ) : IRepoAd, IRepoAdInitializable {
 
-    private val db = postgreSQL(
-        url = properties.url,
-        username = properties.user,
-        password = properties.password,
-        options = ConnectionPool.Options(maxConnections = properties.maxConnections),
-    )
-
-    private val tableRef = "${properties.schema}.${properties.table}"
-    private val allColumns = SqlFields.columns()
-
-    override fun save(ads: Collection<MkplAd>): Collection<MkplAd> = runBlocking {
-        ads.map { ad ->
-            val stmt = buildInsertStmt(ad)
-            val rows: List<MkplAd> = db.fetchAll(stmt, MkplAdRowMapper).getOrThrow()
-            rows.first()
-        }
+    private val db by lazy {
+        postgreSQL(
+            url = properties.url,
+            username = properties.user,
+            password = properties.password,
+            options = ConnectionPool.Options(maxConnections = properties.maxConnections),
+        )
     }
 
-    fun clear(): Unit = runBlocking {
-        db.execute(Statement.create("DELETE FROM $tableRef;")).getOrThrow()
-    }
+    private val dbName = "\"${properties.schema}\".\"${properties.table}\""
+    private val cols = SqlFields.allFields.joinToString { it.quoted() }
 
     override suspend fun createAd(rq: DbAdRequest): IDbAdResponse = tryAdMethod {
-        val newId = randomUuid()
-        val ad = rq.ad.copy(id = MkplAdId(newId), lock = MkplAdLock(randomUuid()))
-        val stmt = buildInsertStmt(ad)
+        val ad = rq.ad.copy(id = MkplAdId(randomUuid()), lock = MkplAdLock(randomUuid()))
+        val stmt = Statement.create(
+            """
+            INSERT INTO $dbName (
+              ${SqlFields.ID.quoted()},
+              ${SqlFields.TITLE.quoted()},
+              ${SqlFields.DESCRIPTION.quoted()},
+              ${SqlFields.VISIBILITY.quoted()},
+              ${SqlFields.AD_TYPE.quoted()},
+              ${SqlFields.LOCK.quoted()},
+              ${SqlFields.OWNER_ID.quoted()},
+              ${SqlFields.PRODUCT_ID.quoted()}
+            ) VALUES (
+              :${SqlFields.ID},
+              :${SqlFields.TITLE},
+              :${SqlFields.DESCRIPTION},
+              CAST(:${SqlFields.VISIBILITY} AS ${SqlFields.VISIBILITY_TYPE}),
+              CAST(:${SqlFields.AD_TYPE} AS ${SqlFields.AD_TYPE_TYPE}),
+              :${SqlFields.LOCK},
+              :${SqlFields.OWNER_ID},
+              :${SqlFields.PRODUCT_ID}
+            )
+            RETURNING $cols
+            """.trimIndent()
+        ).bindAd(ad)
         val rows: List<MkplAd> = db.fetchAll(stmt, MkplAdRowMapper).getOrThrow()
         if (rows.isEmpty()) throw RuntimeException("DB error: insert returned no rows")
         DbAdResponseOk(rows.first())
     }
 
     override suspend fun readAd(rq: DbAdIdRequest): IDbAdResponse = tryAdMethod {
-        val idStr = rq.id.takeIf { it != MkplAdId.NONE }?.asString() ?: return@tryAdMethod errorEmptyId
-        val stmt = Statement.create("SELECT $allColumns FROM $tableRef WHERE ${SqlFields.ID} = :id")
-            .bind("id", idStr)
+        val sql = """
+            SELECT $cols
+            FROM $dbName
+            WHERE ${SqlFields.ID.quoted()} = :${SqlFields.ID}
+            """.trimIndent()
+        val stmt = Statement.create(sql)
+            .bind(SqlFields.ID, rq.id.asString())
         val rows: List<MkplAd> = db.fetchAll(stmt, MkplAdRowMapper).getOrThrow()
         if (rows.isEmpty()) errorNotFound(rq.id)
         else DbAdResponseOk(rows.first())
@@ -58,124 +73,135 @@ class RepoAdSql(
 
     override suspend fun updateAd(rq: DbAdRequest): IDbAdResponse = tryAdMethod {
         val rqAd = rq.ad
-        val adId = rqAd.id.takeIf { it != MkplAdId.NONE } ?: return@tryAdMethod errorEmptyId
-        val expectedLock = rqAd.lock.takeIf { it != MkplAdLock.NONE } ?: return@tryAdMethod errorEmptyLock(adId)
-        val key = adId.asString()
-
-        val current: MkplAd? = findById(key)
+        val newAd = rqAd.copy(lock = MkplAdLock(randomUuid()))
+        val sql = """
+            WITH update_obj AS (
+                UPDATE $dbName a
+                SET ${SqlFields.TITLE.quoted()} = :${SqlFields.TITLE}
+                , ${SqlFields.DESCRIPTION.quoted()} = :${SqlFields.DESCRIPTION}
+                , ${SqlFields.AD_TYPE.quoted()} = CAST(:${SqlFields.AD_TYPE} AS ${SqlFields.AD_TYPE_TYPE})
+                , ${SqlFields.VISIBILITY.quoted()} = CAST(:${SqlFields.VISIBILITY} AS ${SqlFields.VISIBILITY_TYPE})
+                , ${SqlFields.LOCK.quoted()} = :${SqlFields.LOCK}
+                , ${SqlFields.OWNER_ID.quoted()} = :${SqlFields.OWNER_ID}
+                , ${SqlFields.PRODUCT_ID.quoted()} = :${SqlFields.PRODUCT_ID}
+                WHERE  a.${SqlFields.ID.quoted()} = :${SqlFields.ID}
+                AND a.${SqlFields.LOCK.quoted()} = :${SqlFields.LOCK_OLD}
+                RETURNING $cols
+            ),
+            select_obj AS (
+                SELECT $cols FROM $dbName
+                WHERE ${SqlFields.ID.quoted()} = :${SqlFields.ID}
+            )
+            (SELECT * FROM update_obj UNION ALL SELECT * FROM select_obj) LIMIT 1
+            """.trimIndent()
+        val stmt = Statement.create(sql)
+            .bindAd(newAd)
+            .bind(SqlFields.LOCK_OLD, rqAd.lock.asString())
+        val rows: List<MkplAd> = db.fetchAll(stmt, MkplAdRowMapper).getOrThrow()
+        val returnedAd = rows.firstOrNull()
         when {
-            current == null -> errorNotFound(adId)
-            current.lock == MkplAdLock.NONE -> errorDb(RepoEmptyLockException(adId))
-            current.lock != expectedLock -> errorRepoConcurrency(current, expectedLock)
-            else -> {
-                val newLock = MkplAdLock(randomUuid())
-                val updateStmt = Statement.create(
-                    """
-                    UPDATE $tableRef SET
-                        ${SqlFields.TITLE} = :title,
-                        ${SqlFields.DESCRIPTION} = :description,
-                        ${SqlFields.AD_TYPE} = :adType,
-                        ${SqlFields.VISIBILITY} = :visibility,
-                        ${SqlFields.LOCK} = :newLock,
-                        ${SqlFields.OWNER_ID} = :ownerId,
-                        ${SqlFields.PRODUCT_ID} = :productId
-                    WHERE ${SqlFields.ID} = :id AND ${SqlFields.LOCK} = :expectedLock
-                    RETURNING $allColumns
-                    """.trimIndent()
-                )
-                    .bind("id", key)
-                    .bind("expectedLock", expectedLock.asString())
-                    .bind("title", rqAd.title)
-                    .bind("description", rqAd.description)
-                    .bind("adType", rqAd.adType.toDbString())
-                    .bind("visibility", rqAd.visibility.toDbString())
-                    .bind("newLock", newLock.asString())
-                    .bind("ownerId", rqAd.ownerId.asString())
-                    .bind("productId", rqAd.productId.takeIf { it != MkplProductId.NONE }?.asString() ?: "")
-                val updatedRows: List<MkplAd> = db.fetchAll(updateStmt, MkplAdRowMapper).getOrThrow()
-                if (updatedRows.isEmpty()) errorNotFound(adId)
-                else DbAdResponseOk(updatedRows.first())
-            }
+            returnedAd == null -> errorNotFound(rqAd.id)
+            returnedAd.lock == newAd.lock -> DbAdResponseOk(returnedAd)
+            else -> errorRepoConcurrency(returnedAd, rqAd.lock)
         }
     }
 
     override suspend fun deleteAd(rq: DbAdIdRequest): IDbAdResponse = tryAdMethod {
-        val adId = rq.id.takeIf { it != MkplAdId.NONE } ?: return@tryAdMethod errorEmptyId
-        val expectedLock = rq.lock.takeIf { it != MkplAdLock.NONE } ?: return@tryAdMethod errorEmptyLock(adId)
-        val key = adId.asString()
-
-        val current: MkplAd? = findById(key)
+        val sql = """
+            WITH delete_obj AS (
+                DELETE FROM $dbName a
+                WHERE  a.${SqlFields.ID.quoted()} = :${SqlFields.ID}
+                AND a.${SqlFields.LOCK.quoted()} = :${SqlFields.LOCK_OLD}
+                RETURNING '${SqlFields.DELETE_OK}'
+            )
+            SELECT $cols, (SELECT * FROM delete_obj) as flag FROM $dbName
+            WHERE ${SqlFields.ID.quoted()} = :${SqlFields.ID}
+            """.trimIndent()
+        val stmt = Statement.create(sql)
+            .bind(SqlFields.ID, rq.id.asString())
+            .bind(SqlFields.LOCK_OLD, rq.lock.asString())
+        val rows = db.fetchAll(stmt, MkplAdRowMapper).getOrThrow()
+        val returnedAd = rows.firstOrNull()
         when {
-            current == null -> errorNotFound(adId)
-            current.lock == MkplAdLock.NONE -> errorDb(RepoEmptyLockException(adId))
-            current.lock != expectedLock -> errorRepoConcurrency(current, expectedLock)
-            else -> {
-                db.execute(
-                    Statement.create("DELETE FROM $tableRef WHERE ${SqlFields.ID} = :id AND ${SqlFields.LOCK} = :lock")
-                        .bind("id", key)
-                        .bind("lock", expectedLock.asString())
-                ).getOrThrow()
-                DbAdResponseOk(current)
-            }
+            returnedAd == null -> errorNotFound(rq.id)
+            else -> DbAdResponseOk(returnedAd)
         }
     }
 
     override suspend fun searchAd(rq: DbAdFilterRequest): IDbAdsResponse = tryAdsMethod {
-        val conditions = mutableListOf<String>()
-        val params = mutableMapOf<String, String>()
+        val where = listOfNotNull(
+            rq.ownerId.takeIf { it != MkplUserId.NONE }
+                ?.let { "${SqlFields.OWNER_ID.quoted()} = :${SqlFields.OWNER_ID}" },
+            rq.dealSide.takeIf { it != MkplDealSide.NONE }
+                ?.let { "${SqlFields.AD_TYPE.quoted()} = CAST(:${SqlFields.AD_TYPE} AS ${SqlFields.AD_TYPE_TYPE})" },
+            rq.titleFilter.takeIf { it.isNotBlank() }
+                ?.let { "${SqlFields.TITLE.quoted()} LIKE :${SqlFields.TITLE}" },
+        )
+            .takeIf { it.isNotEmpty() }
+            ?.let { "WHERE ${it.joinToString(separator = " AND ")}" }
+            ?: ""
 
-        if (rq.ownerId != MkplUserId.NONE) {
-            conditions.add("${SqlFields.OWNER_ID} = :ownerId")
-            params["ownerId"] = rq.ownerId.asString()
-        }
-        if (rq.dealSide != MkplDealSide.NONE) {
-            conditions.add("${SqlFields.AD_TYPE} = :dealSide")
-            params["dealSide"] = rq.dealSide.toDbString()
-        }
-        if (rq.titleFilter.isNotBlank()) {
-            conditions.add("(${SqlFields.TITLE} LIKE :titleFilter OR ${SqlFields.DESCRIPTION} LIKE :titleFilter)")
-            params["titleFilter"] = "%${rq.titleFilter}%"
-        }
+        val sql = """
+            SELECT $cols
+            FROM $dbName $where
+            """.trimIndent()
 
-        val sql = StringBuilder("SELECT $allColumns FROM $tableRef")
-        if (conditions.isNotEmpty()) {
-            sql.append(" WHERE ${conditions.joinToString(" AND ")}")
-        }
-
-        val stmt = Statement.create(sql.toString())
-        params.forEach { (k, v) -> stmt.bind(k, v) }
+        val stmt = Statement.create(sql)
+        if (rq.ownerId != MkplUserId.NONE)
+            stmt.bind(SqlFields.OWNER_ID, rq.ownerId.asString())
+        if (rq.dealSide != MkplDealSide.NONE)
+            stmt.bind(SqlFields.AD_TYPE, rq.dealSide.toDbString())
+        if (rq.titleFilter.isNotBlank())
+            stmt.bind(SqlFields.TITLE, "%${rq.titleFilter}%")
 
         val rows: List<MkplAd> = db.fetchAll(stmt, MkplAdRowMapper).getOrThrow()
         DbAdsResponseOk(data = rows)
     }
 
-    private fun findById(key: String): MkplAd? {
-        val stmt = Statement.create("SELECT $allColumns FROM $tableRef WHERE ${SqlFields.ID} = :id")
-            .bind("id", key)
-        val rows: List<MkplAd> = runBlocking {
-            db.fetchAll(stmt, MkplAdRowMapper).getOrThrow()
+    override fun save(ads: Collection<MkplAd>): Collection<MkplAd> = runBlocking {
+        ads.map { ad ->
+            val stmt = Statement.create(
+                """
+                INSERT INTO $dbName (
+                  ${SqlFields.ID.quoted()},
+                  ${SqlFields.TITLE.quoted()},
+                  ${SqlFields.DESCRIPTION.quoted()},
+                  ${SqlFields.VISIBILITY.quoted()},
+                  ${SqlFields.AD_TYPE.quoted()},
+                  ${SqlFields.LOCK.quoted()},
+                  ${SqlFields.OWNER_ID.quoted()},
+                  ${SqlFields.PRODUCT_ID.quoted()}
+                ) VALUES (
+                  :${SqlFields.ID},
+                  :${SqlFields.TITLE},
+                  :${SqlFields.DESCRIPTION},
+                  CAST(:${SqlFields.VISIBILITY} AS ${SqlFields.VISIBILITY_TYPE}),
+                  CAST(:${SqlFields.AD_TYPE} AS ${SqlFields.AD_TYPE_TYPE}),
+                  :${SqlFields.LOCK},
+                  :${SqlFields.OWNER_ID},
+                  :${SqlFields.PRODUCT_ID}
+                )
+                RETURNING $cols
+                """.trimIndent()
+            ).bindAd(ad)
+            val rows: List<MkplAd> = db.fetchAll(stmt, MkplAdRowMapper).getOrThrow()
+            rows.first()
         }
-        return rows.firstOrNull()
     }
 
-    private fun buildInsertStmt(ad: MkplAd): Statement {
-        val id = ad.id.takeIf { it != MkplAdId.NONE }?.asString() ?: randomUuid()
-        val lock = ad.lock.takeIf { it != MkplAdLock.NONE }?.asString() ?: randomUuid()
-        return Statement.create(
-            """
-            INSERT INTO $tableRef ($allColumns)
-            VALUES (:id, :title, :description, :adType, :visibility, :lock, :ownerId, :productId)
-            RETURNING $allColumns
-            """.trimIndent()
-        )
-            .bind("id", id)
-            .bind("title", ad.title)
-            .bind("description", ad.description)
-            .bind("adType", ad.adType.toDbString())
-            .bind("visibility", ad.visibility.toDbString())
-            .bind("lock", lock)
-            .bind("ownerId", ad.ownerId.asString())
-            .bind("productId", ad.productId.takeIf { it != MkplProductId.NONE }?.asString() ?: "")
+    fun clear(): Unit = runBlocking {
+        db.execute(Statement.create("DELETE FROM $dbName;")).getOrThrow()
+    }
+
+    private fun Statement.bindAd(ad: MkplAd): Statement = apply {
+        bind(SqlFields.ID, ad.id.asString())
+        bind(SqlFields.TITLE, ad.title)
+        bind(SqlFields.DESCRIPTION, ad.description)
+        bind(SqlFields.AD_TYPE, ad.adType.toDbString())
+        bind(SqlFields.VISIBILITY, ad.visibility.toDbString())
+        bind(SqlFields.LOCK, ad.lock.asString())
+        bind(SqlFields.OWNER_ID, ad.ownerId.asString())
+        bind(SqlFields.PRODUCT_ID, ad.productId.takeIf { it != MkplProductId.NONE }?.asString() ?: "")
     }
 
     private suspend fun tryAdMethod(block: suspend () -> IDbAdResponse): IDbAdResponse = try {
