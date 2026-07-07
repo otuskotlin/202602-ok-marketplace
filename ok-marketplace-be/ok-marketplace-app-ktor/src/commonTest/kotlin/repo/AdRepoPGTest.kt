@@ -2,22 +2,22 @@ package ru.otus.otuskotlin.marketplace.app.ktor.repo
 
 import com.benasher44.uuid.uuid4
 import ru.otus.otuskotlin.marketplace.common.models.MkplAd
+import ru.otus.otuskotlin.marketplace.libs.sysenv.sysEnv
 import ru.otus.otuskotlin.marketplace.repo.common.AdRepoInitialized
 import ru.otus.otuskotlin.marketplace.repo.pgsqlx4k.RepoAdSql
 import ru.otus.otuskotlin.marketplace.repo.pgsqlx4k.SqlProperties
 
 /**
  * Вспомогательный объект для PG-тестов.
- *
- * Контейнер PostgreSQL поднимается Gradle-задачей jvmTestPg.
- * Порт передаётся в тест через system property "postgresPort".
+ * Порт читается через sysEnv — единый API для JVM и native.
+ * Контейнер PostgreSQL управляется Gradle-задачами pgUp/pgDn.
  */
 object AdRepoPGTest {
 
-    private const val HOST = "localhost"
-    private const val USER = "postgres"
-    private const val PASS = "marketplace-pass"
-    private val PORT = System.getProperty("postgresPort")?.toInt() ?: 5432
+    private val host get() = sysEnv("postgresHost") ?: "localhost"
+    private val port get() = sysEnv("postgresPort")?.toInt() ?: 5432
+    private val user get() = sysEnv("postgresUser") ?: "postgres"
+    private val pass get() = sysEnv("postgresPass") ?: "marketplace-pass"
 
     fun repoUnderTestContainer(
         initObjects: Collection<MkplAd> = emptyList(),
@@ -25,12 +25,12 @@ object AdRepoPGTest {
     ) = AdRepoInitialized(
         repo = RepoAdSql(
             SqlProperties(
-                host = HOST,
-                user = USER,
-                password = PASS,
-                port = PORT,
+                host = host,
+                port = port,
+                user = user,
+                password = pass,
             ),
-            randomUuid = randomUuid
+            randomUuid = randomUuid,
         ),
         initObjects = initObjects,
     )

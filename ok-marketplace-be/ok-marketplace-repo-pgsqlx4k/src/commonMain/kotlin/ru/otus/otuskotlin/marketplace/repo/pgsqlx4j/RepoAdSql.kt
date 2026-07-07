@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import ru.otus.otuskotlin.marketplace.common.helpers.errorSystem
 import ru.otus.otuskotlin.marketplace.common.models.*
 import ru.otus.otuskotlin.marketplace.common.repo.*
+import ru.otus.otuskotlin.marketplace.common.repo.exceptions.RepoEmptyLockException
 import ru.otus.otuskotlin.marketplace.repo.common.IRepoAdInitializable
 
 class RepoAdSql(
@@ -58,14 +59,23 @@ class RepoAdSql(
     }
 
     override suspend fun deleteAd(rq: DbAdIdRequest): IDbAdResponse = tryAdMethod {
-        val stmt = Statement.create(SqlQueryBuilder.delete(dbName, cols))
-            .bind(SqlFields.ID, rq.id.asString())
-            .bind(SqlFields.LOCK_OLD, rq.lock.asString())
-        val rows = db.fetchAll(stmt, MkplAdRowMapper).getOrThrow()
-        val returnedAd = rows.firstOrNull()
+        val id = rq.id.takeIf { it != MkplAdId.NONE } ?: return@tryAdMethod errorEmptyId
+        val oldLock = rq.lock.takeIf { it != MkplAdLock.NONE } ?: return@tryAdMethod errorEmptyLock(id)
+
+        // 1. Читаем текущее состояние
+        val current = fetchById(id)
         when {
-            returnedAd == null -> errorNotFound(rq.id)
-            else -> DbAdResponseOk(returnedAd)
+            current == null -> errorNotFound(id)
+            current.lock == MkplAdLock.NONE -> errorDb(RepoEmptyLockException(id))
+            current.lock != oldLock -> errorRepoConcurrency(current, oldLock)
+            else -> {
+                // 2. Удаляем с проверкой lock
+                val stmt = Statement.create("DELETE FROM $dbName WHERE ${SqlFields.ID.quoted()} = :id AND ${SqlFields.LOCK.quoted()} = :lock")
+                    .bind("id", id.asString())
+                    .bind("lock", oldLock.asString())
+                db.execute(stmt).getOrThrow()
+                DbAdResponseOk(current)
+            }
         }
     }
 
@@ -97,6 +107,13 @@ class RepoAdSql(
 
     fun clear(): Unit = runBlocking {
         db.execute(Statement.create(SqlQueryBuilder.clear(dbName))).getOrThrow()
+    }
+
+    private suspend fun fetchById(id: MkplAdId): MkplAd? {
+        val stmt = Statement.create("SELECT $cols FROM $dbName WHERE ${SqlFields.ID.quoted()} = :id")
+            .bind("id", id.asString())
+        val rows: List<MkplAd> = db.fetchAll(stmt, MkplAdRowMapper).getOrThrow()
+        return rows.firstOrNull()
     }
 
     private suspend fun tryAdMethod(block: suspend () -> IDbAdResponse): IDbAdResponse = try {

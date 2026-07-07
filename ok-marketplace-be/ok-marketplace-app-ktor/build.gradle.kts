@@ -46,7 +46,8 @@ docker {
 }
 
 kotlin {
-    jvm {  }
+    targets.removeIf { it.name == "macosX64" }
+
     targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
         binaries {
             executable {
@@ -113,6 +114,9 @@ kotlin {
 
                 implementation(libs.ktor.server.test)
                 implementation(libs.ktor.client.negotiation)
+
+                // Чтение переменных окружения (JVM + Native)
+                implementation(libs.mkpl.sysenv)
             }
         }
 
@@ -144,11 +148,17 @@ kotlin {
         }
 
         /**
-         * linuxX64Test — PG-тесты для linuxX64.
+         * linuxX64Test и macosArm64Test — PG-тесты для native.
          * V2 API мультиплатформенный, поэтому V2 PG тесты можно запускать на native.
-         * Порт PostgreSQL читается из переменной окружения postgresPort.
+         * Порт PostgreSQL читается через actual fun psqlPort() из env (getenv).
          */
         val linuxX64Test by getting {
+            dependencies {
+                implementation(projects.okMarketplaceRepoTests)
+                implementation(projects.okMarketplaceRepoPgsqlx4k)
+            }
+        }
+        val macosArm64Test by getting {
             dependencies {
                 implementation(projects.okMarketplaceRepoTests)
                 implementation(projects.okMarketplaceRepoPgsqlx4k)
@@ -184,6 +194,7 @@ val pgUp by tasks.registering {
         pgContainer.start()
         println("PostgreSQL started at port: ${pgContainer.getServicePort(PG_SERVICE, 5432)}")
     }
+    finalizedBy(pgDn)
 }
 
 val pgDn by tasks.registering {
@@ -221,12 +232,15 @@ val jvmTestPg by tasks.registering(Test::class) {
     testClassesDirs = sourceSets["jvmTest"].output.classesDirs
     classpath = sourceSets["jvmTest"].runtimeClasspath
 
-    // Передаём порт PostgreSQL в тесты через system property
+    // Передаём параметры PostgreSQL в тесты через environment (единый API для JVM и native)
     doFirst {
-        systemProperty("postgresPort", pgContainer.getServicePort(PG_SERVICE, 5432))
+        val pgPort = pgContainer.getServicePort(PG_SERVICE, 5432)
+        environment("postgresHost", "localhost")
+        environment("postgresPort", pgPort.toString())
+        environment("postgresUser", "postgres")
+        environment("postgresPass", "marketplace-pass")
     }
 
-    // Используем тот же test runner, что и обычные jvmTest
     useJUnit()
 }
 
@@ -244,7 +258,11 @@ tasks.withType<KotlinNativeTest>().configureEach {
         dependsOn(pgUp)
         finalizedBy(pgDn)
         doFirst {
-            environment("postgresPort", pgContainer.getServicePort(PG_SERVICE, 5432).toString())
+            val pgPort = pgContainer.getServicePort(PG_SERVICE, 5432)
+            environment("postgresHost", "localhost")
+            environment("postgresPort", pgPort.toString())
+            environment("postgresUser", "postgres")
+            environment("postgresPass", "marketplace-pass")
         }
     }
 }

@@ -15,7 +15,7 @@ import ru.otus.otuskotlin.marketplace.e2e.be.scenarios.v1.ScenariosV1
 import ru.otus.otuskotlin.marketplace.e2e.be.scenarios.v2.ScenariosV2
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TestPgSqlx4k: BaseContainerTest(KtorJvmPGDockerCompose) {
+class TestPgJvm: BaseContainerTest(KtorJvmPGDockerCompose) {
     private val client: Client = RestClient(compose)
     @Test
     fun info() {
