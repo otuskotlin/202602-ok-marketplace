@@ -1,5 +1,8 @@
 package ru.otus.otuskotlin.markeplace.app.spring.config
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.otus.otuskotlin.markeplace.app.spring.base.MkplAppSettings
@@ -11,10 +14,15 @@ import ru.otus.otuskotlin.marketplace.common.repo.IRepoAd
 import ru.otus.otuskotlin.marketplace.logging.common.MpLoggerProvider
 import ru.otus.otuskotlin.marketplace.logging.jvm.mpLoggerLogback
 import ru.otus.otuskotlin.marketplace.repo.inmemory.AdRepoInMemory
+import ru.otus.otuskotlin.marketplace.repo.pgsqlx4k.RepoAdSql
 
 @Suppress("unused")
+@EnableConfigurationProperties(AdConfigPostgres::class)
 @Configuration
-class AdConfig {
+class AdConfig(val postgresConfig: AdConfigPostgres) {
+
+    val logger: Logger = LoggerFactory.getLogger(AdConfig::class.java)
+
     @Bean
     fun processor(corSettings: MkplCorSettings) = MkplAdProcessor(corSettings = corSettings)
 
@@ -25,7 +33,9 @@ class AdConfig {
     fun testRepo(): IRepoAd = AdRepoInMemory()
 
     @Bean
-    fun prodRepo(): IRepoAd = AdRepoInMemory()
+    fun prodRepo(): IRepoAd = RepoAdSql(postgresConfig.psql).apply {
+        logger.info("Connecting to DB with ${this}")
+    }
 
     @Bean
     fun stubRepo(): IRepoAd = AdRepoStub()

@@ -22,7 +22,7 @@
     │   ├── common/          # Domain: модели, Context, repo interface
     │   ├── biz/             # Application: COR процессор
     │   ├── api/             # API: мапперы
-    │   ├── repo-pgjvm/      # Data: реализация ТОЛЬКО для этой сущности
+    │   ├── repo-pgsqlx4k/      # Data: реализация ТОЛЬКО для этой сущности
     │   ├── repo-inmemory/   # Data: реализация ТОЛЬКО для этой сущности
     │   └── app/             # Infrastructure: бины для этой сущности
     └── {сущность-2}/
@@ -39,5 +39,5 @@
 ## Поддерживаемые варианты
 
 - **app-ktor, app-spring, app-kafka, app-rabbit** — точки входа
-- **repo-inmemory, repo-pgjvm, repo-cassandra, repo-gremlin** — БД
+- **repo-inmemory, repo-pgsqlx4k, repo-cassandra, repo-gremlin** — БД
 - **api-v2-kmp, api-v1-jackson** — API
