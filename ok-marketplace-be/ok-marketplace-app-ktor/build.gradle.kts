@@ -69,6 +69,10 @@ kotlin {
                 implementation(libs.ktor.server.headers.caching)
                 implementation(libs.ktor.server.websocket)
 
+//                // Для того, чтоб получать содержимое запроса более одного раза
+//                В Application.main добавить `install(DoubleReceive)`
+//                implementation("io.ktor:ktor-server-double-receive:${libs.versions.ktor.get()}")
+
                 implementation(project(":ok-marketplace-common"))
                 implementation(project(":ok-marketplace-app-common"))
                 implementation(project(":ok-marketplace-biz"))
@@ -78,6 +82,8 @@ kotlin {
 
                 // Stubs
                 implementation(project(":ok-marketplace-stubs"))
+                // RabbitMQ
+//                implementation(project(":ok-marketplace-app-rabbit"))
 
                 implementation(libs.kotlinx.serialization.core)
                 implementation(libs.kotlinx.serialization.json)
@@ -134,10 +140,13 @@ kotlin {
                 implementation(libs.logback)
 
                 // transport models
-                implementation(project(":ok-marketplace-api-v1-jackson"))
-                implementation(project(":ok-marketplace-api-v1-mappers"))
+                implementation(projects.okMarketplaceApiV1Jackson)
+                implementation(projects.okMarketplaceApiV1Mappers)
+                implementation(projects.okMarketplaceApiV2Kmp)
 
                 implementation("ru.otus.otuskotlin.marketplace.libs:ok-marketplace-lib-logging-logback")
+                implementation(projects.okMarketplaceRepoCassandra)
+                implementation(libs.testcontainers.postgres)
             }
         }
 
