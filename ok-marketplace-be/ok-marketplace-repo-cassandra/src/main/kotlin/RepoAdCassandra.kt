@@ -5,6 +5,9 @@ import com.datastax.oss.driver.api.core.CqlSession
 import com.datastax.oss.driver.api.core.cql.AsyncResultSet
 import com.datastax.oss.driver.internal.core.type.codec.extras.enums.EnumNameCodec
 import com.datastax.oss.driver.internal.core.type.codec.registry.DefaultCodecRegistry
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.future.asDeferred
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import ru.otus.otuskotlin.marketplace.backend.repo.cassandra.model.AdCassandraDTO
@@ -17,6 +20,7 @@ import ru.otus.otuskotlin.marketplace.common.repo.*
 import ru.otus.otuskotlin.marketplace.repo.common.IRepoAdInitializable
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.util.concurrent.CompletionStage
 
 class RepoAdCassandra(
     private val keyspaceName: String,
@@ -52,7 +56,13 @@ class RepoAdCassandra(
 
     fun clear() = dao.deleteAll()
 
-    override fun save(ads: Collection<MkplAd>): Collection<MkplAd> = runBlocking { ads.onEach { dao.create(AdCassandraDTO(it)).await() } }
+    override fun save(ads: Collection<MkplAd>): Collection<MkplAd> = runBlocking {
+        // Запускаем все запросы параллельно в текущем корутин-контексте
+        ads.map { ad ->
+            dao.create(AdCassandraDTO(ad)).asDeferred()
+        }.awaitAll()
+        ads
+    }
 
     override suspend fun createAd(rq: DbAdRequest): IDbAdResponse = tryAdMethod {
         val new = rq.ad.copy(id = MkplAdId(randomUuid()), lock = MkplAdLock(randomUuid()))
