@@ -16,14 +16,14 @@ class GremlinTest {
     class RepoAdGremlinCreateTest : RepoAdCreateTest() {
         override val repo = AdRepoInitialized(
             initObjects = initObjects,
-            repo = repository("test_create", uuidNew.asString())
+            repo = repository(uuid =  uuidNew.asString())
         )
     }
 
     class RepoAdGremlinReadTest : RepoAdReadTest() {
         override val repo = AdRepoInitialized(
             initObjects = initObjects,
-            repo = repository("test_read")
+            repo = repository()
         )
         override val readSucc = repo.initializedObjects[0]
     }
@@ -31,7 +31,7 @@ class GremlinTest {
     class RepoAdGremlinUpdateTest : RepoAdUpdateTest() {
         override val repo = AdRepoInitialized(
             initObjects = initObjects,
-            repo = repository("test_update", lockNew.asString())
+            repo = repository(uuid = lockNew.asString())
         )
         override val updateSucc: MkplAd by lazy { repo.initializedObjects[0] }
         override val updateConc: MkplAd by lazy { repo.initializedObjects[1] }
@@ -40,7 +40,7 @@ class GremlinTest {
     class RepoAdGremlinDeleteTest : RepoAdDeleteTest() {
         override val repo = AdRepoInitialized(
             initObjects = initObjects,
-            repo = repository("test_delete")
+            repo = repository()
         )
         override val deleteSucc: MkplAd by lazy { repo.initializedObjects[0] }
         override val deleteConc: MkplAd by lazy { repo.initializedObjects[1] }
@@ -50,7 +50,7 @@ class GremlinTest {
     class RepoAdGremlinSearchTest : RepoAdSearchTest() {
         override val repo = AdRepoInitialized(
             initObjects = initObjects,
-            repo = repository("test_search")
+            repo = repository()
         )
         override val initializedObjects: List<MkplAd> = repo.initializedObjects
     }

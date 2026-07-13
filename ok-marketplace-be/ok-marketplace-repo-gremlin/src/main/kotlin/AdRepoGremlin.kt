@@ -40,7 +40,7 @@ class AdRepoGremlin(
             enableSsl(enableSsl)
         }.create()
     }
-    private val g by lazy { traversal().withRemote(DriverRemoteConnection.using(cluster, graph)) }
+    private val g by lazy { traversal().with(DriverRemoteConnection.using(cluster, graph)) }
 
     init {
         initRepo?.also { it(g) }

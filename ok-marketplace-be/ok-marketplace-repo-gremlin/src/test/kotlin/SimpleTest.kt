@@ -25,8 +25,8 @@ class SimpleTest {
     private val user: String = "root"
     private val pass: String = "root_root"
 
-//    private val dbName: String = "graph"
-     private val dbName: String = "mkpl" // Этот граф должен быть настроен в /home/arcadedb/config/gremlin-server.groovy
+    private val dbName: String = "graph"
+//     private val dbName: String = "mkpl" // Этот граф должен быть настроен в /home/arcadedb/config/gremlin-server.groovy
 
     private val aPort: Int = 2480 // Порт для интерфейса ArcadeDb
     private val gPort: Int = 8182 // Порт для интерфейса Apache Tinkerpop Gremlin
@@ -89,8 +89,7 @@ class SimpleTest {
             .authProperties(authProp)
             .create()
         traversal()
-            //               Этот граф должен быть указан в /home/arcadedb/config/gremlin-server.groovy
-            .withRemote(DriverRemoteConnection.using(cluster, dbName))
+            .with(DriverRemoteConnection.using(cluster, dbName))
             .use { g ->
                 val user = g
                     .addV("User")

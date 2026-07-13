@@ -22,7 +22,7 @@ open class ArcadeDbContainer {
     }
 
     fun repository(
-        @Suppress("UNUSED_PARAMETER") db: String,
+        db: String = "graph",
         uuid: String? = null
     ): AdRepoGremlin {
         return AdRepoGremlin(
@@ -31,7 +31,10 @@ open class ArcadeDbContainer {
             enableSsl = false,
             user = username,
             pass = password,
-            graph = "graph", // сюда должно бы встать значение аргумента db, но для этого нужно настраивать БД
+            // В gremlin создать БД нельзя,
+            // БД создается в каждом вендоре по-своему
+            // Поэтому здесь всегда используем БД по умолчанию 'graph'
+            graph = db,
             randomUuid = uuid?.let { { uuid } } ?: { uuid4().toString() },
             initRepo = { g -> g.V().drop().iterate() },
         )
