@@ -9,14 +9,14 @@ object MkplAdRowMapper : RowMapper<MkplAd> {
     override fun map(row: ResultSet.Row, converters: ValueEncoderRegistry): MkplAd {
         return MkplAd(
             id = MkplAdId(row.get(SqlFields.ID).asString()),
-            title = row.get(SqlFields.TITLE).asString() ?: "",
-            description = row.get(SqlFields.DESCRIPTION).asString() ?: "",
+            title = row.get(SqlFields.TITLE).asString(),
+            description = row.get(SqlFields.DESCRIPTION).asString(),
             ownerId = MkplUserId(row.get(SqlFields.OWNER_ID).asString()),
             adType = parseDealSide(row.get(SqlFields.AD_TYPE).asString()),
             visibility = parseVisibility(row.get(SqlFields.VISIBILITY).asString()),
             lock = MkplAdLock(row.get(SqlFields.LOCK).asString()),
             productId = row.get(SqlFields.PRODUCT_ID).asString()
-                ?.takeIf { it.isNotBlank() }
+                .takeIf { it.isNotBlank() }
                 ?.let { MkplProductId(it) }
                 ?: MkplProductId.NONE,
         )
