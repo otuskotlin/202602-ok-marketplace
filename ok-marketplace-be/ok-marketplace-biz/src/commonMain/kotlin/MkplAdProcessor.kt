@@ -1,5 +1,7 @@
 package ru.otus.otuskotlin.marketplace.biz
 
+import ru.otus.otuskotlin.marketplace.biz.general.getAdState
+import ru.otus.otuskotlin.marketplace.biz.general.getAdStates
 import ru.otus.otuskotlin.marketplace.biz.general.initStatus
 import ru.otus.otuskotlin.marketplace.biz.general.operation
 import ru.otus.otuskotlin.marketplace.biz.repo.*
@@ -51,6 +53,7 @@ class MkplAdProcessor(
                 repoPrepareCreate("Подготовка объекта для сохранения")
                 repoCreate("Создание объявления в БД")
             }
+            getAdState("Вычисление состояния объявления")
             prepareResult("Подготовка ответа")
         }
         operation("Получить объявление", MkplCommand.READ) {
@@ -77,6 +80,7 @@ class MkplAdProcessor(
                     handle { adRepoDone = adRepoRead }
                 }
             }
+            getAdState("Вычисление состояния объявления")
             prepareResult("Подготовка ответа")
         }
         operation("Изменить объявление", MkplCommand.UPDATE) {
@@ -112,6 +116,7 @@ class MkplAdProcessor(
                 repoPrepareUpdate("Подготовка объекта для обновления")
                 repoUpdate("Обновление объявления в БД")
             }
+            getAdState("Вычисление состояния объявления")
             prepareResult("Подготовка ответа")
         }
         operation("Удалить объявление", MkplCommand.DELETE) {
@@ -140,6 +145,7 @@ class MkplAdProcessor(
                 repoPrepareDelete("Подготовка объекта для удаления")
                 repoDelete("Удаление объявления из БД")
             }
+            getAdState("Вычисление состояния объявления")
             prepareResult("Подготовка ответа")
         }
         operation("Поиск объявлений", MkplCommand.SEARCH) {
@@ -156,6 +162,7 @@ class MkplAdProcessor(
                 finishAdFilterValidation("Успешное завершение процедуры валидации")
             }
             repoSearch("Поиск объявления в БД по фильтру")
+            getAdStates("Вычисление состояния объявления")
             prepareResult("Подготовка ответа")
         }
         operation("Поиск подходящих предложений для объявления", MkplCommand.OFFERS) {
@@ -179,6 +186,7 @@ class MkplAdProcessor(
                 repoPrepareOffers("Подготовка данных для поиска предложений")
                 repoOffers("Поиск предложений для объявления в БД")
             }
+            getAdStates("Вычисление состояния объявления")
             prepareResult("Подготовка ответа")
         }
     }.build()
